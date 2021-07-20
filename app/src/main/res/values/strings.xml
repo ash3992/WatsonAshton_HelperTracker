@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">WatsonAshton_HelperTracker</string>
+    <string name="underline_text"><u>New User?</u></string>
+    <string name="submit">Submit</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="log_in">Log In</string>
 </resources>

@@ -15,7 +15,9 @@ public class LogInFragment extends Fragment {
 
     LogInListener mListener;
 
-    public interface  LogInListener{ }
+    public interface  LogInListener{
+        void LogInNewUserClicked();
+    }
 
     public static LogInFragment newInstance(){
         Bundle args = new Bundle();
@@ -36,5 +38,18 @@ public class LogInFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
    return inflater.inflate(R.layout.fragment_sign_in_layout,container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull  View view, @Nullable  Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        TextView textNewUser = requireView().findViewById(R.id.textViewNewUser);
+        textNewUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.LogInNewUserClicked();
+            }
+        });
     }
 }
