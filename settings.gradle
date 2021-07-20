@@ -1,0 +1,2 @@
+rootProject.name = "WatsonAshton_HelperTracker"
+include ':app'
