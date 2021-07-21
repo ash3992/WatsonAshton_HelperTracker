@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "819227411951",
+    "project_id": "helpertracker-b85f6",
+    "storage_bucket": "helpertracker-b85f6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819227411951:android:88c34fc4304d9b5023a21a",
+        "android_client_info": {
+          "package_name": "com.example.watsonashton_helpertracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "819227411951-4seei2b688vn050i5ic64av5lqiuvke9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA46VkeXeZc2ApeA28hPWLSkhDtxf21KYw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "819227411951-4seei2b688vn050i5ic64av5lqiuvke9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

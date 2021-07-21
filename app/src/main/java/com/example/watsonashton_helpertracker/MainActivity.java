@@ -5,7 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements LogInFragment.LogInListener {
+import com.example.watsonashton_helpertracker.fragments.LogInFragment;
+
+public class MainActivity extends AppCompatActivity implements LogInFragment.LogInListener, SignUpFragment.SignUpListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,6 +19,16 @@ public class MainActivity extends AppCompatActivity implements LogInFragment.Log
 
     @Override
     public void LogInNewUserClicked() {
-        Toast.makeText(this, "Please fill out all boxes", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Sign Up", Toast.LENGTH_SHORT).show();
+        getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
+                SignUpFragment.newInstance()).commit();
+
+    }
+
+    @Override
+    public void SignUpAlreadyAnUserClicked() {
+        Toast.makeText(this, "Log In", Toast.LENGTH_SHORT).show();
+        getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
+                LogInFragment.newInstance()).commit();
     }
 }

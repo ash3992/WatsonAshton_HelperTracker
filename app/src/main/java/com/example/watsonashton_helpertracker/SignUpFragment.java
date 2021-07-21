@@ -11,17 +11,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-public class LogInFragment extends Fragment {
+import com.example.watsonashton_helpertracker.fragments.LogInFragment;
 
-    LogInListener mListener;
+public class SignUpFragment extends Fragment {
 
-    public interface  LogInListener{
-        void LogInNewUserClicked();
+    SignUpListener mListener;
+
+    public interface  SignUpListener{
+        //void LogInNewUserClicked();
+        void SignUpAlreadyAnUserClicked();
     }
 
-    public static LogInFragment newInstance(){
+    public static SignUpFragment newInstance(){
         Bundle args = new Bundle();
-        LogInFragment fragment = new LogInFragment();
+        SignUpFragment fragment = new SignUpFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -29,26 +32,26 @@ public class LogInFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if(context instanceof LogInFragment.LogInListener){
-            mListener = (LogInFragment.LogInListener) context;
+        if(context instanceof SignUpFragment.SignUpListener){
+            mListener = (SignUpFragment.SignUpListener) context;
         }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-   return inflater.inflate(R.layout.fragment_sign_in_layout,container, false);
+        return inflater.inflate(R.layout.fragment_sign_up_layout,container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull  View view, @Nullable  Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        TextView textNewUser = requireView().findViewById(R.id.textViewNewUser);
+        TextView textNewUser = requireView().findViewById(R.id.textViewAlreadyAnUser);
         textNewUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mListener.LogInNewUserClicked();
+                mListener.SignUpAlreadyAnUserClicked();
             }
         });
     }
