@@ -17,6 +17,7 @@ public class LogInFragment extends Fragment {
 
     LogInListener mListener;
 
+
     public interface  LogInListener{
         void LogInNewUserClicked();
     }

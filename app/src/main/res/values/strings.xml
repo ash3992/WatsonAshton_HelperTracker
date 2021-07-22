@@ -3,13 +3,58 @@
     <string name="app_name_title">HelperTracker</string>
     <string name="underline_text"><u>New User?</u></string>
     <string name="underline_account_text"><u>Already an user?</u></string>
-    <string name="submit">Submit</string>
     <string name="log_in">Log In</string>
+    <string name="button">Button</string>
+    <string name="create_account">Create account</string>
+    <string name="todo">TODO</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
-    <string name="button">Button</string>
-    <string name="create_account">Create account</string>
-    <string name="todo">TODO</string>
+    <string name="height">Height:</string>
+    <string name="eye_color">Eye Color:</string>
+    <string name="hair_color">Hair Color:</string>
+    <string name="weight">Weight:</string>
+    <string name="submit">Submit</string>
+
+    <array name="heightArray">
+        <item name="4'8">4\'8\"</item>
+        <item name="4'9">4\'9\"</item>
+        <item name="5'0">5\'0</item>
+        <item name="5'1">5\'1\"</item>
+        <item name="5'2">5\'2\"</item>
+        <item name="5'3">5\'3\"</item>
+        <item name="5'4">5\'4\"</item>
+        <item name="5'5">5\'5\"</item>
+        <item name="5'6">5\'6\"</item>
+        <item name="5'7">5\'7\"</item>
+        <item name="5'8">5\'8\"</item>
+        <item name="5'9">5\'9\"</item>
+        <item name="6'0">6\'0</item>
+        <item name="6'1">6\'1\"</item>
+        <item name="6'2">6\'2\"</item>
+        <item name="6'3">6\'3\"</item>
+        <item name="6'4">6\'4\"</item>
+        <item name="6'5">6\'5\"</item>
+        <item name="6'6">6\'6\"</item>
+        <item name="6'7">6\'7\"</item>
+        <item name="6'8">6\'8\"</item>
+        <item name="6'9">6\'9\"</item>
+        <item name="7'0">7\'0</item>
+    </array>
+    <array name="hairColorArray">
+        <item name="red">Red</item>
+        <item name="blonde">Blonde</item>
+        <item name="brunette">Brunette</item>
+        <item name="black">Black</item>
+    </array>
+    <array name="eyeColorArray">
+        <item name="brown">Brown</item>
+        <item name="blue">Blue</item>
+        <item name="hazel">Hazel</item>
+        <item name="amber">Amber</item>
+        <item name="gray">Gray</item>
+        <item name="amber">Green</item>
+
+    </array>
 </resources>
