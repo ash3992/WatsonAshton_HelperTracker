@@ -128,7 +128,7 @@ HashMap<String, String> users = new HashMap<String, String>();
         }
         message = "New account created!";
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-        mDatabase.child(userKey).setValue(users);
+        mDatabase.child(userKey).child("userDetails").setValue(users);
         user = mAuth.getCurrentUser();
         Log.d("TAG", "updateUI: "+mAuth.getCurrentUser().getEmail());
 
