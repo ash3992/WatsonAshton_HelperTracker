@@ -115,57 +115,57 @@ public class SignUpFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                ((TextView) parent.getChildAt( 0)).setTextColor(Color.BLACK);
                 if(heightSpinner.getSelectedItem().toString().equals("4'8\"")){
-                    height = "4'8\"";
+                    height = "4'8";
                 }else if(heightSpinner.getSelectedItem().toString().equals("4'9\"")){
-                    height = "4'9\"";
+                    height = "4'9";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'0")){
                     height = "5'0";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'1\"")){
-                    height = "5'1\"";
+                    height = "5'1";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'2\"")){
-                    height = "5'2\"";
+                    height = "5'2";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'3\"")){
-                    height = "5'3\"";
+                    height = "5'3";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'4\"")){
-                    height = "5'4\"";
+                    height = "5'4";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'5\"")){
-                    height = "5'5\"";
+                    height = "5'5";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'6\"")){
-                    height = "5'6\"";
+                    height = "5'6";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'7\"")){
-                    height = "5'7\"";
+                    height = "5'7";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'8\"")){
-                    height = "5'8\"";
+                    height = "5'8";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'9\"")){
-                    height = "5'9\"";
+                    height = "5'9";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'10\"")){
-                    height = "5'10\"";
+                    height = "5'10";
                 }else if(heightSpinner.getSelectedItem().toString().equals("5'11\"")){
-                    height = "5'11\"";
+                    height = "5'11";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'0")){
                     height = "6'0";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'1\"")){
-                    height = "6'1\"";
+                    height = "6'1";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'2\"")){
-                    height = "6'2\"";
+                    height = "6'2";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'3\"")){
-                    height = "6'3\"";
+                    height = "6'3";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'4\"")){
-                    height = "6'4\"";
+                    height = "6'4";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'5\"")){
-                    height = "6'5\"";
+                    height = "6'5";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'6\"")){
-                    height = "6'6\"";
+                    height = "6'6";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'7\"")){
-                    height = "6'7\"";
+                    height = "6'7";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'8\"")){
-                    height = "6'8\"";
+                    height = "6'8";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'9\"")){
-                    height = "6'9\"";
+                    height = "6'9";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'10\"")){
-                    height = "6'10\"";
+                    height = "6'10";
                 }else if(heightSpinner.getSelectedItem().toString().equals("6'11\"")){
-                    height = "6'11\"";
+                    height = "6'11";
                 }else if(heightSpinner.getSelectedItem().toString().equals("7'0")){
                     height = "7'0";
                 }

@@ -12,7 +12,6 @@ import android.widget.Toast;
 import com.example.watsonashton_helpertracker.fragments.LogInFragment;
 import com.example.watsonashton_helpertracker.fragments.SignUpFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,18 +20,16 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements LogInFragment.LogInListener, SignUpFragment.SignUpListener {
 private FirebaseDatabase database;
 private DatabaseReference mDatabase;
 private FirebaseAuth mAuth;
-Spinner heightSpinner;
 String message;
 Context mContext;
-    HashMap users = new HashMap();
+String userEmail;
+HashMap<String, String> users = new HashMap<String, String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,18 +40,9 @@ Context mContext;
         database = FirebaseDatabase.getInstance();
         mDatabase = database.getReference("Users");
         mAuth = FirebaseAuth.getInstance();
-message = "account not created please fix fields";
+
         getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
                 LogInFragment.newInstance()).commit();
-
-        //mAuth = FirebaseAuth.getInstance().getCurrentUser()
-       // HashMap hashMap = new HashMap();
-      /*  users.put("Id", 123);
-        users.put("Email", "ashtonwatson1021@gmail.com");
-        users.put("Password", "938974Aurhdd()");
-        createNewUser("ashtonwatson1021ddddds1@gmail.com","aaaaaaaaaaaaa");*/
-        //mDatabase.child("example").setValue(hashMap);
-
 
     }
 
@@ -89,8 +77,6 @@ message = "account not created please fix fields";
         users.put("Hair", uHair);
         users.put("Eyes", uEye);
         users.put("Weight", weight);
-
-      //  users.put("Password", password);
         createNewUser(email,password);
     }
 
@@ -103,7 +89,8 @@ message = "account not created please fix fields";
                         if(task.isSuccessful()){
                             Log.d("TAG", "success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            message = "New account created!";
+                          //  message = "New account created!";
+                            userEmail = email;
                             updateUI(user);
                         }
                         if(!task.isSuccessful()){
@@ -130,8 +117,18 @@ message = "account not created please fix fields";
 
     public void updateUI(FirebaseUser user){
         String keyId = mDatabase.push().getKey();
+        char[] emailChar = userEmail.toCharArray();
+        String userKey ="";
 
-        mDatabase.child("ashtonwatson1vvv021@gmailcom").setValue(users);
+        for(int i = 0; i < emailChar.length; i++){
+            if(emailChar[i] == '.'){
+            }else{
+                 userKey += String.valueOf(emailChar[i]);
+            }
+        }
+        message = "New account created!";
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        mDatabase.child(userKey).setValue(users);
         user = mAuth.getCurrentUser();
         Log.d("TAG", "updateUI: "+mAuth.getCurrentUser().getEmail());
 
