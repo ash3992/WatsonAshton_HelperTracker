@@ -3,6 +3,7 @@ package com.example.watsonashton_helpertracker.fragments;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +11,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,14 +31,18 @@ public class SignUpFragment extends Fragment {
     String height;
     String hairColor;
     String eyeColor;
-    TextView firstNameTextView;
-    TextView lastNameTextView;
-    TextView emailTextView;
-    TextView passwordTextView;
+    EditText firstNameTextView;
+    EditText lastNameTextView;
+   EditText emailTextView;
+    EditText passwordTextView;
+   EditText weightTextView;
     Button sigUpButton;
+    TextView textNewUser;
 
     public interface  SignUpListener{
         void SignUpAlreadyAnUserClicked();
+        void SignUpInfoEmpty();
+        void SignUpInfoNotEmpty(String fname,String lname, String email, String password,String uHeight, String uHair, String uEye, String weight );
     }
 
     public static SignUpFragment newInstance(){
@@ -72,11 +79,30 @@ public class SignUpFragment extends Fragment {
         firstNameTextView = requireView().findViewById(R.id.editTextSignUpFirstName);
         lastNameTextView = requireView().findViewById(R.id.editTextSignUpLastName);
         emailTextView = requireView().findViewById(R.id.editTextSignUpEmail);
-        passwordTextView = requireView().findViewById(R.id.editTextLogInPassword);
+        passwordTextView = requireView().findViewById(R.id.editTextSignUpPassword);
         sigUpButton = requireView().findViewById(R.id.buttonCreateAccount);
-        TextView textNewUser = requireView().findViewById(R.id.textViewAlreadyAnUser);
+        weightTextView = requireView().findViewById(R.id.editTextSignUpWeight);
+        textNewUser = requireView().findViewById(R.id.textViewAlreadyAnUser);
 
+    sigUpButton.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        if(firstNameTextView.getText().toString().equals("")
+                || lastNameTextView.getText().toString().equals("")
+                || emailTextView.getText().toString().equals("") ||
+               passwordTextView.getText().toString().equals("") ||
+                weightTextView.getText().toString().equals("") ){
 
+           mListener.SignUpInfoEmpty();
+        }else{
+             mListener.SignUpInfoNotEmpty(firstNameTextView.getText().toString(),
+                     lastNameTextView.getText().toString(),emailTextView.getText().toString(),
+                     passwordTextView.getText().toString(),
+                     height,hairColor,eyeColor,weightTextView.getText().toString());
+        }
+
+    }
+    });
         textNewUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
