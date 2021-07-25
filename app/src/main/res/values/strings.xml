@@ -6,9 +6,6 @@
     <string name="log_in">Log In</string>
     <string name="button">Button</string>
     <string name="create_account">Create account</string>
-    <string name="todo">TODO</string>
-    <string name="first_name">First Name</string>
-    <string name="last_name">Last Name</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="height">Height:</string>
@@ -16,6 +13,12 @@
     <string name="hair_color">Hair Color:</string>
     <string name="weight">Weight:</string>
     <string name="submit">Submit</string>
+    <string name="todo">TODO</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="please_add_your_first_contact_to_get_started">Please add your first contact to get started.</string>
+    <string name="save">save</string>
 
     <array name="heightArray">
         <item name="4'8">4\'8\"</item>

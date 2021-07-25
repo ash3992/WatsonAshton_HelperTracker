@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,6 +22,9 @@ public class LogInFragment extends Fragment {
 
     public interface  LogInListener{
         void LogInNewUserClicked();
+        void LogInFieldsEmpty();
+        void LogInUser(String email, String password);
+
     }
 
     public static LogInFragment newInstance(){
@@ -47,6 +52,9 @@ public class LogInFragment extends Fragment {
     public void onViewCreated(@NonNull  View view, @Nullable  Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        EditText loginEmailEditText = requireView().findViewById(R.id.editTextLogInEmail);
+        EditText loginPasswordEditText = requireView().findViewById(R.id.editTextLogInPassword);
+        Button loginButton = requireView().findViewById(R.id.loginButton);
         TextView textNewUser = requireView().findViewById(R.id.textViewNewUser);
         textNewUser.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,5 +62,21 @@ public class LogInFragment extends Fragment {
                 mListener.LogInNewUserClicked();
             }
         });
+
+        loginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(loginEmailEditText.getText().toString().trim().equals("") ||
+                        loginPasswordEditText.getText().toString().trim().equals("")){
+                    mListener.LogInFieldsEmpty();
+                }else{
+
+                    mListener.LogInUser(loginEmailEditText.getText().toString(),
+                            loginPasswordEditText.getText().toString());
+                }
+            }
+        });
+
+
     }
 }

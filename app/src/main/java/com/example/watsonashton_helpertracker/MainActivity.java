@@ -16,6 +16,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -29,6 +31,9 @@ private FirebaseAuth mAuth;
 String message;
 Context mContext;
 String userEmail;
+String TAG = "TAG";
+Boolean userFromLogin;
+Boolean userFromNewAccount;
 HashMap<String, String> users = new HashMap<String, String>();
 
     @Override
@@ -44,6 +49,13 @@ HashMap<String, String> users = new HashMap<String, String>();
         getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
                 LogInFragment.newInstance()).commit();
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null){
+            String name = user.getEmail();
+            Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
+        }else{
+
+        }
     }
 
     @Override
@@ -52,6 +64,59 @@ HashMap<String, String> users = new HashMap<String, String>();
         getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
                 SignUpFragment.newInstance()).commit();
 
+    }
+
+
+
+    @Override
+    public void LogInFieldsEmpty() {
+        Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void LogInUser(String email, String password) {
+            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if(task.isSuccessful()){
+                    Log.d("TAG", "success");
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    //  message = "New account created!";
+                    userEmail = email;
+                    userFromLogin = true;
+                    userFromNewAccount = false;
+                    updateUI(user);
+
+                }else{
+                    try
+                    {
+                        throw task.getException();
+                    }
+                    // if user enters wrong email.
+                    catch (FirebaseAuthInvalidUserException invalidEmail)
+                    {
+                        Log.d(TAG, "onComplete: invalid_email");
+
+
+                        // TODO: take your actions!
+                        message = "Invalid email entered!";
+                    }
+                    // if user enters wrong password.
+                    catch (FirebaseAuthInvalidCredentialsException wrongPassword)
+                    {
+                        Log.d(TAG, "onComplete: wrong_password");
+                        message = "Invalid password entered!";
+
+                        // TODO: Take your action
+                    }
+                    catch (Exception e)
+                    {
+                        Log.d(TAG, "onComplete: " + e.getMessage());
+                    }
+                }
+            }
+        });
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
 
@@ -91,18 +156,24 @@ HashMap<String, String> users = new HashMap<String, String>();
                             FirebaseUser user = mAuth.getCurrentUser();
                           //  message = "New account created!";
                             userEmail = email;
+                            userFromNewAccount = true;
+                            userFromLogin = false;
                             updateUI(user);
+
                         }
                         if(!task.isSuccessful()){
                             FirebaseAuthException e = (FirebaseAuthException)task.getException();
                             if(e.getMessage().contains("The email address is badly formatted.")){
                                 message = "The email address is badly formatted.";
+                                messageToUser();
                             }
                             else if(e.getMessage().contains("The email address is already in use by another account.")){
                                 message = "The email address is already in use by another account.";
+                                messageToUser();
 
                             } else if(e.getMessage().contains("The given password is invalid. [ Password should be at least 6 characters ]")){
                                 message = "The given password is invalid. [ Password should be at least 6 characters ]";
+                                messageToUser();
                             }
 
                             Log.e("LoginActivity", "Failed Registration", e);
@@ -112,6 +183,11 @@ HashMap<String, String> users = new HashMap<String, String>();
 
                     }
                 });
+
+
+       // Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+    public void messageToUser(){
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
@@ -126,11 +202,20 @@ HashMap<String, String> users = new HashMap<String, String>();
                  userKey += String.valueOf(emailChar[i]);
             }
         }
-        message = "New account created!";
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-        mDatabase.child(userKey).child("userDetails").setValue(users);
-        user = mAuth.getCurrentUser();
-        Log.d("TAG", "updateUI: "+mAuth.getCurrentUser().getEmail());
+        if(userFromNewAccount) {
+            message = "New account created!";
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            mDatabase.child(userKey).child("userDetails").setValue(users);
+            user = mAuth.getCurrentUser();
+            Log.d("TAG", "updateUI: " + mAuth.getCurrentUser().getEmail());
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
+                    NewContactFragment.newInstance()).commit();
+        }
+
+        if(userFromLogin){
+            message = "Welcome back!";
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
 
     }
 
