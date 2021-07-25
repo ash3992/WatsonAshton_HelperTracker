@@ -1,4 +1,4 @@
-package com.example.watsonashton_helpertracker;
+package com.example.watsonashton_helpertracker.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -8,17 +8,24 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.watsonashton_helpertracker.fragments.LogInFragment;
+import com.example.watsonashton_helpertracker.R;
 
 public class NewContactFragment extends Fragment {
+    EditText firstName;
+    EditText lastName;
+    EditText phoneNumber;
     NewContactListener mListener;
 
-    public interface  NewContactListener{ }
+    public interface  NewContactListener{
+        void newContactFieldsEmpty();
+        void newContactReadyToAdd(String f_name, String l_name, String phoneNum);
+    }
 
     public static NewContactFragment newInstance(){
         Bundle args = new Bundle();
@@ -44,6 +51,9 @@ public class NewContactFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable  Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
+        firstName =  requireView().findViewById(R.id.editTextFirstContactFirstName);
+        lastName = requireView().findViewById(R.id.editTextFirstContactLastName);
+        phoneNumber = requireView().findViewById(R.id.editTextFirstContactPhoneNumber);
     }
 
     @Override
@@ -54,6 +64,16 @@ public class NewContactFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        if(firstName.getText().toString().trim().equals("") ||
+                lastName.getText().toString().trim().equals("")||
+                phoneNumber.getText().toString().trim().equals("")){
+
+            mListener.newContactFieldsEmpty();
+        }else{
+            mListener.newContactReadyToAdd(firstName.getText().toString(), lastName.getText().toString(), phoneNumber.getText().toString());
+
+        }
         return super.onOptionsItemSelected(item);
     }
 }

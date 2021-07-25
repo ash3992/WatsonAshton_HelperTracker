@@ -2,14 +2,21 @@ package com.example.watsonashton_helpertracker;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.watsonashton_helpertracker.fragments.LogInFragment;
+import com.example.watsonashton_helpertracker.fragments.NewContactFragment;
 import com.example.watsonashton_helpertracker.fragments.SignUpFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -24,7 +31,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 
-public class MainActivity extends AppCompatActivity implements LogInFragment.LogInListener, SignUpFragment.SignUpListener {
+public class MainActivity extends AppCompatActivity implements LogInFragment.LogInListener, SignUpFragment.SignUpListener, NewContactFragment.NewContactListener {
 private FirebaseDatabase database;
 private DatabaseReference mDatabase;
 private FirebaseAuth mAuth;
@@ -34,6 +41,8 @@ String userEmail;
 String TAG = "TAG";
 Boolean userFromLogin;
 Boolean userFromNewAccount;
+private static final int PERMISSION_SEND_SMS = 123;
+
 HashMap<String, String> users = new HashMap<String, String>();
 
     @Override
@@ -41,7 +50,6 @@ HashMap<String, String> users = new HashMap<String, String>();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = this;
-
         database = FirebaseDatabase.getInstance();
         mDatabase = database.getReference("Users");
         mAuth = FirebaseAuth.getInstance();
@@ -56,17 +64,55 @@ HashMap<String, String> users = new HashMap<String, String>();
         }else{
 
         }
-    }
+        requestSmsPermission();
+       // exampleTextMessage();
 
+    }
+    private void requestSmsPermission() {
+
+        // check permission is given
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            // request permission (see result in onRequestPermissionsResult() method)
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.SEND_SMS},
+                    PERMISSION_SEND_SMS);
+        } else {
+            // permission already granted run sms send
+           // sendSms(phone, message);
+            exampleTextMessage();
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+       // switch (requestCode) {
+           // case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted
+                   // sendSms(phone, message);
+                    exampleTextMessage();
+
+                } else {
+                    // permission denied
+                }
+                return;
+          //  }
+      //  }
+    }
+public void exampleTextMessage(){
+    Intent intent=new Intent(getApplicationContext(),MainActivity.class);
+   // PendingIntent pi=PendingIntent.getActivity(getApplicationContext(), 0, intent,0);
+    SmsManager sms=SmsManager.getDefault();
+    sms.sendTextMessage("5555215556", null, "This is a broadcast!!!!\nHelp is needed right now", null,null);
+
+}
     @Override
     public void LogInNewUserClicked() {
         Toast.makeText(this, "Sign Up", Toast.LENGTH_SHORT).show();
         getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
                 SignUpFragment.newInstance()).commit();
-
     }
-
-
 
     @Override
     public void LogInFieldsEmpty() {
@@ -144,9 +190,24 @@ HashMap<String, String> users = new HashMap<String, String>();
         users.put("Weight", weight);
         createNewUser(email,password);
     }
+    @Override
+    public void newContactFieldsEmpty() {
+        Toast.makeText(this, "Please fill out all fields to continue", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void newContactReadyToAdd(String f_name, String l_name, String phoneNum) {
+        if(phoneNum.length() != 10){
+            Toast.makeText(this, "Not a valid number please use this format: 123456789", Toast.LENGTH_SHORT).show();
+        }else{
+            Intent intent=new Intent(getApplicationContext(),MainActivity.class);
+            PendingIntent pi=PendingIntent.getActivity(getApplicationContext(), 0, intent,0);
+            SmsManager sms=SmsManager.getDefault();
+            sms.sendTextMessage(phoneNum, null, phoneNum, pi,null);
+        }
+    }
 
     public void createNewUser(String email, String password){
-
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>(){
                     @Override
@@ -154,12 +215,10 @@ HashMap<String, String> users = new HashMap<String, String>();
                         if(task.isSuccessful()){
                             Log.d("TAG", "success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                          //  message = "New account created!";
                             userEmail = email;
                             userFromNewAccount = true;
                             userFromLogin = false;
                             updateUI(user);
-
                         }
                         if(!task.isSuccessful()){
                             FirebaseAuthException e = (FirebaseAuthException)task.getException();
@@ -170,26 +229,17 @@ HashMap<String, String> users = new HashMap<String, String>();
                             else if(e.getMessage().contains("The email address is already in use by another account.")){
                                 message = "The email address is already in use by another account.";
                                 messageToUser();
-
                             } else if(e.getMessage().contains("The given password is invalid. [ Password should be at least 6 characters ]")){
                                 message = "The given password is invalid. [ Password should be at least 6 characters ]";
                                 messageToUser();
                             }
-
                             Log.e("LoginActivity", "Failed Registration", e);
-                          //  message.hide();
                             return;
                         }
-
                     }
                 });
-
-
-       // Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
-    public void messageToUser(){
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
+    public void messageToUser(){ Toast.makeText(this, message, Toast.LENGTH_SHORT).show(); }
 
     public void updateUI(FirebaseUser user){
         String keyId = mDatabase.push().getKey();
