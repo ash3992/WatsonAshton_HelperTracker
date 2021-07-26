@@ -41,6 +41,8 @@ String userEmail;
 String TAG = "TAG";
 Boolean userFromLogin;
 Boolean userFromNewAccount;
+String testRunFirstName;
+String testRunLastName;
 private static final int PERMISSION_SEND_SMS = 123;
 
 HashMap<String, String> users = new HashMap<String, String>();
@@ -64,47 +66,44 @@ HashMap<String, String> users = new HashMap<String, String>();
         }else{
 
         }
-        requestSmsPermission();
+
+      //  requestSmsPermission();
        // exampleTextMessage();
+
 
     }
     private void requestSmsPermission() {
 
         // check permission is given
-        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             // request permission (see result in onRequestPermissionsResult() method)
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.SEND_SMS},
                     PERMISSION_SEND_SMS);
         } else {
             // permission already granted run sms send
-           // sendSms(phone, message);
-            exampleTextMessage();
+          //  TrailTextMessage();
         }
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-       // switch (requestCode) {
-           // case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
-
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted
-                   // sendSms(phone, message);
-                    exampleTextMessage();
 
                 } else {
                     // permission denied
+                    requestSmsPermission();
                 }
                 return;
-          //  }
-      //  }
+
     }
-public void exampleTextMessage(){
+public void TrailTextMessage(String phone, String message){
     Intent intent=new Intent(getApplicationContext(),MainActivity.class);
    // PendingIntent pi=PendingIntent.getActivity(getApplicationContext(), 0, intent,0);
     SmsManager sms=SmsManager.getDefault();
-    sms.sendTextMessage("5555215556", null, "This is a broadcast!!!!\nHelp is needed right now", null,null);
+    sms.sendTextMessage(phone, null, message, null,null);
+
 
 }
     @Override
@@ -180,6 +179,8 @@ public void exampleTextMessage(){
 
     @Override
     public void SignUpInfoNotEmpty(String fname, String lname, String email, String password, String uHeight, String uHair, String uEye, String weight) {
+        testRunFirstName = fname;
+        testRunLastName = lname;
         users.put("First Name", fname);
         users.put("Last Name", lname);
         users.put("Email", email);
@@ -197,13 +198,22 @@ public void exampleTextMessage(){
 
     @Override
     public void newContactReadyToAdd(String f_name, String l_name, String phoneNum) {
-        if(phoneNum.length() != 10){
+        requestSmsPermission();
+        if(phoneNum.length() != 10 || phoneNum.contains("(")|| phoneNum.contains(")") || phoneNum.contains("-") || phoneNum.contains("_")){
             Toast.makeText(this, "Not a valid number please use this format: 123456789", Toast.LENGTH_SHORT).show();
         }else{
-            Intent intent=new Intent(getApplicationContext(),MainActivity.class);
-            PendingIntent pi=PendingIntent.getActivity(getApplicationContext(), 0, intent,0);
-            SmsManager sms=SmsManager.getDefault();
-            sms.sendTextMessage(phoneNum, null, phoneNum, pi,null);
+            String message1 = "This is a practice signal sent by "+testRunFirstName+" "+ testRunLastName+" through TrackerHelper";
+
+            String message2 = f_name+" if "+testRunFirstName+ " is ever in trouble you'll receive a text message similar to this with his/her current location.";
+            String message3 = "No further action is needed at this time. Thank you.";
+
+            TrailTextMessage(phoneNum, message1);
+            TrailTextMessage(phoneNum, message2);
+            TrailTextMessage(phoneNum, message3);
+
+            Toast.makeText(this, phoneNum, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Signal has been sent out, please check with the receiver to confirmed.", Toast.LENGTH_SHORT).show();
+
         }
     }
 
