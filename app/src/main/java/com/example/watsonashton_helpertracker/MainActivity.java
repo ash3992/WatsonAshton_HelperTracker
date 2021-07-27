@@ -28,8 +28,11 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
@@ -71,6 +74,27 @@ HashMap<String, String> contacts = new HashMap<String, String>();
         }else{
 
         }
+
+        mDatabase.child("abjdj2@gmailcom/").child("contacts/").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull  DataSnapshot snapshot) {
+                for(DataSnapshot t: snapshot.getChildren()){
+                    Toast.makeText(getApplicationContext(),t.getKey().toString() , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),t.getValue().toString() , Toast.LENGTH_SHORT).show();
+                }
+
+                /*for(int i =0; i< snapshot.getChildren())
+                Log.e("some", "======="+snapshot.getChildren().iterator().next().getValue());
+                Toast.makeText(getApplicationContext(),snapshot.getChildren().iterator().next().getKey().toString() , Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),snapshot.getChildren().iterator().next().getValue().toString() , Toast.LENGTH_SHORT).show();*/
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
 
 
     }

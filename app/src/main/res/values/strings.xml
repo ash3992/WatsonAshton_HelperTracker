@@ -19,6 +19,14 @@
     <string name="phone_number">Phone Number</string>
     <string name="please_add_your_first_contact_to_get_started">Please add your first contact to get started.</string>
     <string name="save">save</string>
+    <string name="address">Address:</string>
+    <string name="lon">Lon:</string>
+    <string name="last_update_time">Last Update Time:</string>
+    <string name="push_the_red_button_in_case_of_emergency">Push the red button in case of emergency</string>
+    <string name="lat">Lat:</string>
+    <string name="stop_signal">Stop Signal</string>
+    <string name="please_add_a_contact_to_continue_once_added_and_saved_we_will_send_a_test_signal_to_them">Please add a contact to continue. Once added and saved we will send a test signal to them.</string>
+    
 
     <array name="heightArray">
         <item name="4'8">4\'8\"</item>
