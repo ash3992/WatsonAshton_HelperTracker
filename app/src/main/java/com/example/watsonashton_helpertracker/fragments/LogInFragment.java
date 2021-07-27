@@ -45,14 +45,15 @@ public class LogInFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-   return inflater.inflate(R.layout.fragment_sign_in_layout,container, false);
+ //  return inflater.inflate(R.layout.fragment_sign_in_layout,container, false);
+        return inflater.inflate(R.layout.fragment_home_screen_layout,container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull  View view, @Nullable  Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        EditText loginEmailEditText = requireView().findViewById(R.id.editTextLogInEmail);
+       /* EditText loginEmailEditText = requireView().findViewById(R.id.editTextLogInEmail);
         EditText loginPasswordEditText = requireView().findViewById(R.id.editTextLogInPassword);
         Button loginButton = requireView().findViewById(R.id.loginButton);
         TextView textNewUser = requireView().findViewById(R.id.textViewNewUser);
@@ -76,7 +77,7 @@ public class LogInFragment extends Fragment {
                 }
             }
         });
-
+*/
 
     }
 }

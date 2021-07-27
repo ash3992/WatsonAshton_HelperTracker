@@ -37,15 +37,16 @@
         android:layout_width="369dp"
         android:layout_height="51dp"
         android:layout_marginTop="40dp"
+        android:autofillHints=""
         android:ems="10"
+        android:focusable="auto"
         android:hint="@string/email"
         android:inputType="textEmailAddress"
         android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.38"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        android:autofillHints="" />
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
         android:id="@+id/loginButton"
@@ -75,10 +76,11 @@
         android:layout_height="87dp"
         android:layout_marginTop="124dp"
         android:background="@color/black"
+        android:contentDescription="@string/todo"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.452"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/stat_sys_warning"
-        android:contentDescription="@string/todo" />
+        app:srcCompat="@android:drawable/stat_sys_warning" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
