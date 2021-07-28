@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -20,6 +21,7 @@ public class HomeScreenFragment extends Fragment {
     public interface  HomeScreenListener{
 
         void SignalButtonPushed();
+        void StopSignalButtonHasBeenPushed();
 
     }
 
@@ -54,6 +56,14 @@ public class HomeScreenFragment extends Fragment {
             mListener.SignalButtonPushed();
         }
     });
+
+        Button stopSignal = requireView().findViewById(R.id.buttonStopSignal);
+        stopSignal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.StopSignalButtonHasBeenPushed();
+            }
+        });
 
 
 

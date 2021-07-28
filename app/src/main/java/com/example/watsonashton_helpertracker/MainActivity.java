@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LifecycleObserver;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -12,12 +13,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.watsonashton_helpertracker.fragments.LogInFragment;
@@ -37,9 +43,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements LogInFragment.LogInListener, SignUpFragment.SignUpListener, NewContactFragment.NewContactListener, HomeScreenFragment.HomeScreenListener, LocationListener {
+public class MainActivity extends AppCompatActivity implements LifecycleObserver,LogInFragment.LogInListener, SignUpFragment.SignUpListener, NewContactFragment.NewContactListener, HomeScreenFragment.HomeScreenListener, LocationListener {
 private FirebaseDatabase database;
 private DatabaseReference mDatabase;
 private FirebaseAuth mAuth;
@@ -56,7 +65,9 @@ String testRunFirstName;
 String testRunLastName;
 String masterUserKey;
 Boolean positiveButtonPushed;
+Boolean signalButtonIsActive;
 boolean mRequestingUpdates = false;
+Boolean locationRequestFromUI = false;
 
 
 HashMap<String, String> users = new HashMap<String, String>();
@@ -241,13 +252,40 @@ public void TrailTextMessage(String phone, String message){
     }
     @Override
     public void SignalButtonPushed() {
-        Toast.makeText(this, "WORKING!!!!", Toast.LENGTH_SHORT).show();
+      // if(!signalButtonIsActive){
+      //     Toast.makeText(this, "Click the 'Stop Signal' button for signal to dismiss.", Toast.LENGTH_SHORT).show();
+      // }else {
+        Button stop  = findViewById(R.id.buttonStopSignal);
+        ImageView redButton = findViewById(R.id.imageViewStartSignal);
+        TextView info = findViewById(R.id.textViewInsturcutons);
+        info.setText(R.string.push_the_red_button_in_case_of_emergency);
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates ){
-            mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
-            mRequestingUpdates = true;
-        }
+        stop.setEnabled(true);
+        redButton.setEnabled(false);
+           signalButtonIsActive = true;
+           Toast.makeText(this, "WORKING!!!!", Toast.LENGTH_SHORT).show();
+           locationRequestFromUI = true;
 
+           if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
+               mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
+               mRequestingUpdates = true;
+           }
+    //   }
+
+    }
+
+    @Override
+    public void StopSignalButtonHasBeenPushed() {
+        Button stop  = findViewById(R.id.buttonStopSignal);
+        ImageView redButton = findViewById(R.id.imageViewStartSignal);
+        TextView info = findViewById(R.id.textViewInsturcutons);
+        //info.setText(R.string.stop_singal);
+        info.setText(R.string.push_the_red_button_in_case_of_emergency);
+        Toast.makeText(this, "Broadcasts have stop being sent out", Toast.LENGTH_SHORT).show();
+
+        stop.setEnabled(false);
+        redButton.setEnabled(true);
+        //signalButtonIsActive = false;
     }
 
     @Override
@@ -370,8 +408,59 @@ public void TrailTextMessage(String phone, String message){
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        String l = Double.toString(location.getLatitude());
-        Toast.makeText(this, l, Toast.LENGTH_SHORT).show();
+        Geocoder geocoder;
+        List<Address> addresses;
+        String address = "";
+        String city = "";
+        String state = "";
+        String country;
+        String postalCode = "";
+        String knownName;
+        geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+            address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+            city = addresses.get(0).getLocality();
+            state = addresses.get(0).getAdminArea();
+            country = addresses.get(0).getCountryName();
+            postalCode = addresses.get(0).getPostalCode();
+            knownName = addresses.get(0).getFeatureName();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(locationRequestFromUI){
+
+
+            locationRequestFromUI = false;
+            TextView lat = findViewById(R.id.textViewLatFillIn);
+            TextView lon = findViewById(R.id.textViewLonFillIn);
+            TextView addy = findViewById(R.id.textViewAddressFillIn);
+            TextView info = findViewById(R.id.textViewInsturcutons);
+            Button stop  = findViewById(R.id.buttonStopSignal);
+            ImageView redButton = findViewById(R.id.imageViewStartSignal);
+
+            stop.setEnabled(true);
+
+
+            String latText = Double.toString(location.getLatitude());
+            String lonText = Double.toString(location.getLongitude());
+
+           // String addyText = address + "\n"+city+" "+state+" "+postalCode;
+            String addyText = address;
+            lon.setText(lonText);
+            lat.setText(latText);
+            addy.setText(addyText);
+            info.setText(R.string.stop_singal);
+
+
+
+            if(mRequestingUpdates){
+                mRequestingUpdates = false;
+                mLocationManger.removeUpdates(this);
+            }
+
+        }
+
     }
     @Override
     public void onProviderEnabled(@NonNull String provider) {
