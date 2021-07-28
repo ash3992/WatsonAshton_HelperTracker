@@ -12,6 +12,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -36,10 +39,13 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
-public class MainActivity extends AppCompatActivity implements LogInFragment.LogInListener, SignUpFragment.SignUpListener, NewContactFragment.NewContactListener {
+public class MainActivity extends AppCompatActivity implements LogInFragment.LogInListener, SignUpFragment.SignUpListener, NewContactFragment.NewContactListener, HomeScreenFragment.HomeScreenListener, LocationListener {
 private FirebaseDatabase database;
 private DatabaseReference mDatabase;
 private FirebaseAuth mAuth;
+private static final int PERMISSION_SEND_SMS = 123;
+private static final  int REQUEST_LOCATION_PERMISSIONS = 0x01001;
+LocationManager mLocationManger;
 String message;
 Context mContext;
 String userEmail;
@@ -49,8 +55,9 @@ Boolean userFromNewAccount;
 String testRunFirstName;
 String testRunLastName;
 String masterUserKey;
-    Boolean positiveButtonPushed;
-private static final int PERMISSION_SEND_SMS = 123;
+Boolean positiveButtonPushed;
+boolean mRequestingUpdates = false;
+
 
 HashMap<String, String> users = new HashMap<String, String>();
 HashMap<String, String> contacts = new HashMap<String, String>();
@@ -63,9 +70,12 @@ HashMap<String, String> contacts = new HashMap<String, String>();
         database = FirebaseDatabase.getInstance();
         mDatabase = database.getReference("Users");
         mAuth = FirebaseAuth.getInstance();
+        mLocationManger = (LocationManager)getSystemService(LOCATION_SERVICE);
 
+      // getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
+       //        LogInFragment.newInstance()).commit();
         getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
-                LogInFragment.newInstance()).commit();
+               HomeScreenFragment.newInstance()).commit();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null){
@@ -74,8 +84,9 @@ HashMap<String, String> contacts = new HashMap<String, String>();
         }else{
 
         }
+        requestLocationPermissions();
 
-        mDatabase.child("abjdj2@gmailcom/").child("contacts/").addListenerForSingleValueEvent(new ValueEventListener() {
+      /*  mDatabase.child("abjdj2@gmailcom/").child("contacts/").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull  DataSnapshot snapshot) {
                 for(DataSnapshot t: snapshot.getChildren()){
@@ -86,17 +97,24 @@ HashMap<String, String> contacts = new HashMap<String, String>();
                 /*for(int i =0; i< snapshot.getChildren())
                 Log.e("some", "======="+snapshot.getChildren().iterator().next().getValue());
                 Toast.makeText(getApplicationContext(),snapshot.getChildren().iterator().next().getKey().toString() , Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(),snapshot.getChildren().iterator().next().getValue().toString() , Toast.LENGTH_SHORT).show();*/
+                Toast.makeText(getApplicationContext(),snapshot.getChildren().iterator().next().getValue().toString() , Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        });
+        });*/
 
 
 
+    }
+    private  void requestLocationPermissions(){
+       if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=  PackageManager.PERMISSION_GRANTED){
+           ActivityCompat.requestPermissions(this,
+                   new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                  REQUEST_LOCATION_PERMISSIONS);
+       }
     }
     private void requestSmsPermission() {
 
@@ -221,6 +239,16 @@ public void TrailTextMessage(String phone, String message){
     public void newContactFieldsEmpty() {
         Toast.makeText(this, "Please fill out all fields to continue", Toast.LENGTH_SHORT).show();
     }
+    @Override
+    public void SignalButtonPushed() {
+        Toast.makeText(this, "WORKING!!!!", Toast.LENGTH_SHORT).show();
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates ){
+            mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
+            mRequestingUpdates = true;
+        }
+
+    }
 
     @Override
     public void newContactReadyToAdd(String f_name, String l_name, String phoneNum) {
@@ -270,14 +298,6 @@ public void TrailTextMessage(String phone, String message){
 
             dlgAlert.create().show();
 
-
-
-
-  /*  if(positiveButtonPushed){
-    Toast.makeText(this, "Signal has been sent out, please check with the receiver to confirmed.", Toast.LENGTH_SHORT).show();
-    }else{
-    Toast.makeText(this, "Contact was not saved.", Toast.LENGTH_SHORT).show();
-    }*/
 
 
         }
@@ -347,4 +367,24 @@ public void TrailTextMessage(String phone, String message){
 
     }
 
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        String l = Double.toString(location.getLatitude());
+        Toast.makeText(this, l, Toast.LENGTH_SHORT).show();
+    }
+    @Override
+    public void onProviderEnabled(@NonNull String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(@NonNull String provider) {
+
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
 }

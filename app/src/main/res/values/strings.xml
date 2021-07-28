@@ -26,7 +26,7 @@
     <string name="lat">Lat:</string>
     <string name="stop_signal">Stop Signal</string>
     <string name="please_add_a_contact_to_continue_once_added_and_saved_we_will_send_a_test_signal_to_them">Please add a contact to continue. Once added and saved we will send a test signal to them.</string>
-    
+
 
     <array name="heightArray">
         <item name="4'8">4\'8\"</item>
