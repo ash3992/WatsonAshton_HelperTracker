@@ -1,8 +1,11 @@
-package com.example.watsonashton_helpertracker;
+package com.example.watsonashton_helpertracker.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -12,16 +15,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.watsonashton_helpertracker.fragments.LogInFragment;
+import com.example.watsonashton_helpertracker.R;
 
 public class HomeScreenFragment extends Fragment {
     HomeScreenListener mListener;
+    MenuItem contacts;
+    MenuItem profile;
+    MenuItem logOut;
 
 
     public interface  HomeScreenListener{
 
         void SignalButtonPushed();
         void StopSignalButtonHasBeenPushed();
+        void UserLogOut();
 
     }
 
@@ -47,12 +54,25 @@ public class HomeScreenFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(@NonNull  Menu menu, @NonNull  MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.home_screen_menu, menu);
+        contacts = menu.getItem(0);
+        profile = menu.getItem(1);
+        logOut = menu.getItem(2);
+    }
+
+    @Override
     public void onViewCreated(@NonNull  View view, @Nullable  Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-    ImageView d = requireView().findViewById(R.id.imageViewStartSignal);
-    d.setOnClickListener(new View.OnClickListener() {
+        setHasOptionsMenu(true);
+    ImageView imageClick = requireView().findViewById(R.id.imageViewStartSignal);
+    imageClick.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            contacts.setEnabled(false);
+            profile.setEnabled(false);
+            logOut.setEnabled(false);
             mListener.SignalButtonPushed();
         }
     });
@@ -61,10 +81,20 @@ public class HomeScreenFragment extends Fragment {
         stopSignal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                contacts.setEnabled(true);
+                profile.setEnabled(true);
+                logOut.setEnabled(true);
                 mListener.StopSignalButtonHasBeenPushed();
             }
         });
 
+        logOut.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                mListener.UserLogOut();
+                return true;
+            }
+        });
 
 
     }

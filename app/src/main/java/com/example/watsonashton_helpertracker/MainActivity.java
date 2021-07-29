@@ -8,7 +8,6 @@ import androidx.lifecycle.LifecycleObserver;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.watsonashton_helpertracker.fragments.HomeScreenFragment;
 import com.example.watsonashton_helpertracker.fragments.LogInFragment;
 import com.example.watsonashton_helpertracker.fragments.NewContactFragment;
 import com.example.watsonashton_helpertracker.fragments.SignUpFragment;
@@ -37,11 +37,8 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -197,7 +194,6 @@ public void TrailTextMessage(String phone, String message){
                     {
                         Log.d(TAG, "onComplete: invalid_email");
 
-
                         // TODO: take your actions!
                         message = "Invalid email entered!";
                     }
@@ -279,13 +275,32 @@ public void TrailTextMessage(String phone, String message){
         Button stop  = findViewById(R.id.buttonStopSignal);
         ImageView redButton = findViewById(R.id.imageViewStartSignal);
         TextView info = findViewById(R.id.textViewInsturcutons);
-        //info.setText(R.string.stop_singal);
         info.setText(R.string.push_the_red_button_in_case_of_emergency);
         Toast.makeText(this, "Broadcasts have stop being sent out", Toast.LENGTH_SHORT).show();
-
         stop.setEnabled(false);
         redButton.setEnabled(true);
-        //signalButtonIsActive = false;
+    }
+
+    @Override
+    public void UserLogOut() {
+        AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
+        dlgAlert.setMessage("Are you sure you want to Log Out?");
+        dlgAlert.setTitle("Log Out");
+        dlgAlert.setCancelable(true);
+        dlgAlert.setPositiveButton("Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getApplicationContext(), "You have log out//ADD LOG LAST!", Toast.LENGTH_SHORT).show();
+                        //LOG OUT HERE
+                    }
+                });
+        dlgAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(), "You didn't log out", Toast.LENGTH_SHORT).show();
+            }
+        });
+        dlgAlert.create().show();
     }
 
     @Override

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id = "@+id/contacts_icon"
+        android:title="@string/contacts"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_baseline_perm_contact_calendar_24"/>
+    <item
+        android:id = "@+id/profile_icon"
+        android:title="@string/profile"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_baseline_person_24"/>
+    <item
+        android:id = "@+id/log_out_icon"
+        android:title="@string/logout"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_baseline_login_24"/>
+</menu>
