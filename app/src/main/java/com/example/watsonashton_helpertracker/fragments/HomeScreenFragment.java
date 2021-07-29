@@ -63,6 +63,15 @@ public class HomeScreenFragment extends Fragment {
     }
 
     @Override
+    public boolean onOptionsItemSelected(@NonNull  MenuItem item) {
+
+        if(item.getItemId() == R.id.log_out_icon){
+            mListener.UserLogOut();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onViewCreated(@NonNull  View view, @Nullable  Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setHasOptionsMenu(true);
@@ -88,13 +97,7 @@ public class HomeScreenFragment extends Fragment {
             }
         });
 
-        logOut.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                mListener.UserLogOut();
-                return true;
-            }
-        });
+
 
 
     }

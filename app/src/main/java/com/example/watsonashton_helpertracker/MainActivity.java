@@ -7,7 +7,9 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleObserver;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,6 +22,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -29,6 +32,7 @@ import com.example.watsonashton_helpertracker.fragments.HomeScreenFragment;
 import com.example.watsonashton_helpertracker.fragments.LogInFragment;
 import com.example.watsonashton_helpertracker.fragments.NewContactFragment;
 import com.example.watsonashton_helpertracker.fragments.SignUpFragment;
+import com.example.watsonashton_helpertracker.objects.Contacts;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -37,10 +41,17 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -51,6 +62,7 @@ private DatabaseReference mDatabase;
 private FirebaseAuth mAuth;
 private static final int PERMISSION_SEND_SMS = 123;
 private static final  int REQUEST_LOCATION_PERMISSIONS = 0x01001;
+private static final ArrayList<Contacts> contactsLog = new ArrayList<>();
 LocationManager mLocationManger;
 String message;
 Context mContext;
@@ -64,6 +76,7 @@ String masterUserKey;
 Boolean positiveButtonPushed;
 Boolean signalButtonIsActive;
 boolean mRequestingUpdates = false;
+Boolean appCurrentOpen;
 Boolean locationRequestFromUI = false;
 
 
@@ -88,13 +101,14 @@ HashMap<String, String> contacts = new HashMap<String, String>();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null){
             String name = user.getEmail();
+            masterUserKey = name;
             Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
         }else{
 
         }
         requestLocationPermissions();
 
-      /*  mDatabase.child("abjdj2@gmailcom/").child("contacts/").addListenerForSingleValueEvent(new ValueEventListener() {
+       /* mDatabase.child("ash1@gmalcom/").child("contacts/").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull  DataSnapshot snapshot) {
                 for(DataSnapshot t: snapshot.getChildren()){
@@ -102,7 +116,7 @@ HashMap<String, String> contacts = new HashMap<String, String>();
                     Toast.makeText(getApplicationContext(),t.getValue().toString() , Toast.LENGTH_SHORT).show();
                 }
 
-                /*for(int i =0; i< snapshot.getChildren())
+               /* for(int i =0; i< snapshot.getChildren())
                 Log.e("some", "======="+snapshot.getChildren().iterator().next().getValue());
                 Toast.makeText(getApplicationContext(),snapshot.getChildren().iterator().next().getKey().toString() , Toast.LENGTH_SHORT).show();
                 Toast.makeText(getApplicationContext(),snapshot.getChildren().iterator().next().getValue().toString() , Toast.LENGTH_SHORT).show();
@@ -116,7 +130,50 @@ HashMap<String, String> contacts = new HashMap<String, String>();
 
 
 
+GrabContacts();
+
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        appCurrentOpen = true;
+        /*
+        TextView info = findViewById(R.id.editTextFirstContactPhoneNumber);
+       info.setText("Something");*/
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        appCurrentOpen = false;
+    }
+
+    private void GrabContacts(){
+        contactsLog.clear();
+      //  masterUserKey+"/"
+        mDatabase.child("abjdj2@gmailcom/").child("contacts/").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot dataSnapshot: snapshot.getChildren()){
+
+                  //  Toast.makeText(getApplicationContext(),dataSnapshot.getKey().toString() , Toast.LENGTH_SHORT).show();
+                  //  Toast.makeText(getApplicationContext(),dataSnapshot.getValue().toString() , Toast.LENGTH_SHORT).show();
+                    Contacts contacts = new Contacts(dataSnapshot.getKey(), dataSnapshot.getValue().toString());
+                    contactsLog.add(contacts);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
     private  void requestLocationPermissions(){
        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=  PackageManager.PERMISSION_GRANTED){
            ActivityCompat.requestPermissions(this,
@@ -125,7 +182,6 @@ HashMap<String, String> contacts = new HashMap<String, String>();
        }
     }
     private void requestSmsPermission() {
-
         // check permission is given
         if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             // request permission (see result in onRequestPermissionsResult() method)
@@ -150,14 +206,13 @@ HashMap<String, String> contacts = new HashMap<String, String>();
                 return;
 
     }
-public void TrailTextMessage(String phone, String message){
+    public void TrailTextMessage(String phone, String message){
     Intent intent=new Intent(getApplicationContext(),MainActivity.class);
    // PendingIntent pi=PendingIntent.getActivity(getApplicationContext(), 0, intent,0);
     SmsManager sms=SmsManager.getDefault();
     sms.sendTextMessage(phone, null, message, null,null);
 
-
-}
+    }
     @Override
     public void LogInNewUserClicked() {
         Toast.makeText(this, "Sign Up", Toast.LENGTH_SHORT).show();
@@ -334,6 +389,7 @@ public void TrailTextMessage(String phone, String message){
                             contacts.put(fullName, phoneNum);
                             mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
                             Toast.makeText(getApplicationContext(), "Signal has been sent out, please check with the receiver to confirmed.", Toast.LENGTH_SHORT).show();
+                            GrabContacts();
 
                            // Toast.makeText(t, phoneNum, Toast.LENGTH_SHORT).show();
 
@@ -416,6 +472,7 @@ public void TrailTextMessage(String phone, String message){
             masterUserKey = userKey;
             message = "Welcome back!";
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            GrabContacts();
         }
 
     }
@@ -445,12 +502,14 @@ public void TrailTextMessage(String phone, String message){
         }
         if(locationRequestFromUI){
 
+            Date currentTime = Calendar.getInstance().getTime();
 
             locationRequestFromUI = false;
             TextView lat = findViewById(R.id.textViewLatFillIn);
             TextView lon = findViewById(R.id.textViewLonFillIn);
             TextView addy = findViewById(R.id.textViewAddressFillIn);
             TextView info = findViewById(R.id.textViewInsturcutons);
+            TextView time = findViewById(R.id.textViewLastUpdateTimeFillIn);
             Button stop  = findViewById(R.id.buttonStopSignal);
             ImageView redButton = findViewById(R.id.imageViewStartSignal);
 
@@ -462,6 +521,7 @@ public void TrailTextMessage(String phone, String message){
 
            // String addyText = address + "\n"+city+" "+state+" "+postalCode;
             String addyText = address;
+            time.setText(currentTime.toString());
             lon.setText(lonText);
             lat.setText(latText);
             addy.setText(addyText);
