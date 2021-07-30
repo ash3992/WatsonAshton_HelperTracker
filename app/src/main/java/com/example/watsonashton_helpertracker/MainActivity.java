@@ -8,7 +8,10 @@ import androidx.lifecycle.LifecycleObserver;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,6 +23,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
@@ -62,6 +66,11 @@ private DatabaseReference mDatabase;
 private FirebaseAuth mAuth;
 private static final int PERMISSION_SEND_SMS = 123;
 private static final  int REQUEST_LOCATION_PERMISSIONS = 0x01001;
+private NotificationManager mNotificationManager;
+private static final int NOTIFICATION_ID = 0;
+private static final String PRIMARY_CHANNEL_ID = "primary_notification_channel";
+long repeatInterval = 1*60*1000;
+long triggerTime = SystemClock.elapsedRealtime() + repeatInterval;
 private static final ArrayList<Contacts> contactsLog = new ArrayList<>();
 LocationManager mLocationManger;
 String message;
@@ -76,12 +85,16 @@ String masterUserKey;
 Boolean positiveButtonPushed;
 Boolean signalButtonIsActive;
 boolean mRequestingUpdates = false;
-Boolean appCurrentOpen;
+Boolean appCurrentlyOpen;
 Boolean locationRequestFromUI = false;
-
-
+User userDetails;
+Boolean firstMessageBeingSent = false;
 HashMap<String, String> users = new HashMap<String, String>();
 HashMap<String, String> contacts = new HashMap<String, String>();
+Intent notifyIntent;
+boolean alarmUp;
+PendingIntent notifyPendingIntent;
+AlarmManager alarmManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +105,11 @@ HashMap<String, String> contacts = new HashMap<String, String>();
         mDatabase = database.getReference("Users");
         mAuth = FirebaseAuth.getInstance();
         mLocationManger = (LocationManager)getSystemService(LOCATION_SERVICE);
+        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notifyIntent = new Intent(this, AlarmReceiver.class);
+        alarmUp = (PendingIntent.getBroadcast(this, NOTIFICATION_ID, notifyIntent, PendingIntent.FLAG_NO_CREATE) != null);
+        notifyPendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_ID, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
       // getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
        //        LogInFragment.newInstance()).commit();
@@ -101,7 +119,16 @@ HashMap<String, String> contacts = new HashMap<String, String>();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null){
             String name = user.getEmail();
-            masterUserKey = name;
+            char[] emailChar = name.toCharArray();
+            String userKey ="";
+
+            for(int i = 0; i < emailChar.length; i++){
+                if(emailChar[i] == '.'){
+                }else{
+                    userKey += String.valueOf(emailChar[i]);
+                }
+            }
+            masterUserKey = userKey;
             Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
         }else{
 
@@ -130,14 +157,54 @@ HashMap<String, String> contacts = new HashMap<String, String>();
 
 
 
-GrabContacts();
+GrabContactsAndUserInfo();
+        AlarmReceiver.OnNewLocationListener onNewLocationListener = new AlarmReceiver.OnNewLocationListener() {
+            @Override
+            public void onNewLocationReceived(String location) {
+                // do something
+                Toast.makeText(MainActivity.this, location, Toast.LENGTH_SHORT)
+                        .show();
+                // then stop listening
+                //  ReceiverPositioningAlarm.clearOnNewLocationListener(this);
+                //  AlarmReceiver.clearOnNewLocationListener(this);
 
+LoationFinder();
+
+            }
+        };
+
+        // start listening for new location
+        AlarmReceiver.setOnNewLocationListener(onNewLocationListener);
+
+    }
+    public void LoationFinder() {
+        if(appCurrentlyOpen == true){
+
+            if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
+
+                mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
+                mRequestingUpdates = true;
+                locationRequestFromUI = true;
+
+
+            }
+        }else if(appCurrentlyOpen == false){
+            if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
+
+                mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
+                mRequestingUpdates = true;
+
+
+
+            }
+
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        appCurrentOpen = true;
+        appCurrentlyOpen = true;
         /*
         TextView info = findViewById(R.id.editTextFirstContactPhoneNumber);
        info.setText("Something");*/
@@ -147,23 +214,51 @@ GrabContacts();
     @Override
     protected void onPause() {
         super.onPause();
-        appCurrentOpen = false;
+        appCurrentlyOpen = false;
     }
 
-    private void GrabContacts(){
+    private void GrabContactsAndUserInfo(){
         contactsLog.clear();
       //  masterUserKey+"/"
-        mDatabase.child("abjdj2@gmailcom/").child("contacts/").addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabase.child(masterUserKey+"/").child("contacts/").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot dataSnapshot: snapshot.getChildren()){
-
-                  //  Toast.makeText(getApplicationContext(),dataSnapshot.getKey().toString() , Toast.LENGTH_SHORT).show();
-                  //  Toast.makeText(getApplicationContext(),dataSnapshot.getValue().toString() , Toast.LENGTH_SHORT).show();
                     Contacts contacts = new Contacts(dataSnapshot.getKey(), dataSnapshot.getValue().toString());
                     contactsLog.add(contacts);
-
                 }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+        mDatabase.child(masterUserKey+"/").child("userDetails").addListenerForSingleValueEvent(new ValueEventListener() {
+            String firstName = "";
+            String lastName = "";
+            String eyes = "";
+            String hair = "";
+            String height = "";
+            String weight = "";
+
+            @Override
+            public void onDataChange(@NonNull  DataSnapshot snapshot) {
+
+                    firstName = (String) snapshot.child("First Name").getValue();
+                   lastName = (String) snapshot.child("Last Name").getValue();
+                    eyes = (String) snapshot.child("Eyes").getValue();
+                    hair = (String) snapshot.child("Hair").getValue();
+                    height = (String) snapshot.child("Height").getValue();
+                    weight = (String) snapshot.child("Weight").getValue();
+
+                    Toast.makeText(getApplicationContext(), eyes, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), height, Toast.LENGTH_SHORT).show();
+
+
+                    userDetails = new User(eyes,firstName,hair,height,lastName,weight);
             }
 
             @Override
@@ -207,8 +302,6 @@ GrabContacts();
 
     }
     public void TrailTextMessage(String phone, String message){
-    Intent intent=new Intent(getApplicationContext(),MainActivity.class);
-   // PendingIntent pi=PendingIntent.getActivity(getApplicationContext(), 0, intent,0);
     SmsManager sms=SmsManager.getDefault();
     sms.sendTextMessage(phone, null, message, null,null);
 
@@ -303,9 +396,8 @@ GrabContacts();
     }
     @Override
     public void SignalButtonPushed() {
-      // if(!signalButtonIsActive){
-      //     Toast.makeText(this, "Click the 'Stop Signal' button for signal to dismiss.", Toast.LENGTH_SHORT).show();
-      // }else {
+        firstMessageBeingSent = true;
+
         Button stop  = findViewById(R.id.buttonStopSignal);
         ImageView redButton = findViewById(R.id.imageViewStartSignal);
         TextView info = findViewById(R.id.textViewInsturcutons);
@@ -317,16 +409,40 @@ GrabContacts();
            Toast.makeText(this, "WORKING!!!!", Toast.LENGTH_SHORT).show();
            locationRequestFromUI = true;
 
-           if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
-               mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
-               mRequestingUpdates = true;
+
+           if(contactsLog.size() == 0){
+               Toast.makeText(this, "Please add a contact before continuing.", Toast.LENGTH_SHORT).show();
+           }else{
+               if(appCurrentlyOpen == true){
+                   if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
+                       if(firstMessageBeingSent == true){
+                           FirstTextMessage(userDetails, contactsLog);
+                       }
+                       mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
+                       mRequestingUpdates = true;
+                       MessageTimer();
+
+                   }
+
+               }
            }
-    //   }
+
+
+    }
+
+    public void MessageTimer(){
+
+        if (alarmManager != null) {
+            alarmManager.setInexactRepeating
+                    (AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerTime, repeatInterval, notifyPendingIntent);
+        }
+
 
     }
 
     @Override
     public void StopSignalButtonHasBeenPushed() {
+        firstMessageBeingSent = false;
         Button stop  = findViewById(R.id.buttonStopSignal);
         ImageView redButton = findViewById(R.id.imageViewStartSignal);
         TextView info = findViewById(R.id.textViewInsturcutons);
@@ -389,7 +505,7 @@ GrabContacts();
                             contacts.put(fullName, phoneNum);
                             mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
                             Toast.makeText(getApplicationContext(), "Signal has been sent out, please check with the receiver to confirmed.", Toast.LENGTH_SHORT).show();
-                            GrabContacts();
+                            GrabContactsAndUserInfo();
 
                            // Toast.makeText(t, phoneNum, Toast.LENGTH_SHORT).show();
 
@@ -409,6 +525,97 @@ GrabContacts();
 
 
 
+        }
+    }
+    public void FirstTextMessage( User user, ArrayList<Contacts> contacts){
+
+        if(contacts.size() == 1){
+            String userInfo = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            contacts.get(0).getFullName();
+            contacts.get(0).getPhoneNum();
+
+            SmsManager sms=SmsManager.getDefault();
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, "***ATTENTION***", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userInfo, null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, contacts.get(0).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+
+        }else if(contacts.size() == 2){
+            String userInfo = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            contacts.get(0).getFullName();
+            contacts.get(0).getPhoneNum();
+
+            SmsManager sms=SmsManager.getDefault();
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, "***ATTENTION***", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userInfo, null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, contacts.get(0).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+
+            String userInfo1 = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            contacts.get(1).getFullName();
+            contacts.get(1).getPhoneNum();
+
+            SmsManager sms1=SmsManager.getDefault();
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, "***ATTENTION***", null,null);
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, userInfo1, null,null);
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, contacts.get(1).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+
+        }else if(contacts.size() == 3){
+            String userInfo = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            contacts.get(0).getFullName();
+            contacts.get(0).getPhoneNum();
+
+            SmsManager sms=SmsManager.getDefault();
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, "***ATTENTION***", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userInfo, null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, contacts.get(0).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+
+            String userInfo1 = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            contacts.get(1).getFullName();
+            contacts.get(1).getPhoneNum();
+
+            SmsManager sms1=SmsManager.getDefault();
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, "***ATTENTION***", null,null);
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, userInfo1, null,null);
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, contacts.get(1).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+
+            String userInfo2 = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            contacts.get(1).getFullName();
+            contacts.get(1).getPhoneNum();
+
+            SmsManager sms2=SmsManager.getDefault();
+            sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null, "***ATTENTION***", null,null);
+            sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null, userInfo1, null,null);
+            sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null, contacts.get(2).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+        }
+
+
+
+
+    }
+
+    public void SendOutLocation(String lat, String lon, String addy){
+        if(contactsLog.size() == 1){
+            SmsManager sms=SmsManager.getDefault();
+            sms.sendTextMessage( contactsLog.get(0).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
+
+        }else if(contactsLog.size() == 2){
+            SmsManager sms=SmsManager.getDefault();
+            sms.sendTextMessage( contactsLog.get(0).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
+            SmsManager sms1=SmsManager.getDefault();
+            sms1.sendTextMessage( contactsLog.get(1).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
+
+        }else if(contactsLog.size() == 3){
+            SmsManager sms=SmsManager.getDefault();
+            sms.sendTextMessage( contactsLog.get(0).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
+            SmsManager sms1=SmsManager.getDefault();
+            sms1.sendTextMessage( contactsLog.get(1).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
+            SmsManager sms2=SmsManager.getDefault();
+            sms2.sendTextMessage( contactsLog.get(2).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
         }
     }
 
@@ -472,7 +679,7 @@ GrabContacts();
             masterUserKey = userKey;
             message = "Welcome back!";
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-            GrabContacts();
+            GrabContactsAndUserInfo();
         }
 
     }
@@ -526,9 +733,21 @@ GrabContacts();
             lat.setText(latText);
             addy.setText(addyText);
             info.setText(R.string.stop_singal);
+            SendOutLocation(latText, lonText, addyText);
 
 
+            if(mRequestingUpdates){
+                mRequestingUpdates = false;
+                mLocationManger.removeUpdates(this);
+            }
 
+        }
+
+        if(appCurrentlyOpen == false){
+            String latText = Double.toString(location.getLatitude());
+            String lonText = Double.toString(location.getLongitude());
+            String addyText = address;
+            SendOutLocation(latText, lonText, addyText);
             if(mRequestingUpdates){
                 mRequestingUpdates = false;
                 mLocationManger.removeUpdates(this);
