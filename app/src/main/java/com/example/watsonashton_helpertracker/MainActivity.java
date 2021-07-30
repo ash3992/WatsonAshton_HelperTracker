@@ -134,42 +134,14 @@ AlarmManager alarmManager;
 
         }
         requestLocationPermissions();
+        GrabContactsAndUserInfo();
 
-       /* mDatabase.child("ash1@gmalcom/").child("contacts/").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull  DataSnapshot snapshot) {
-                for(DataSnapshot t: snapshot.getChildren()){
-                    Toast.makeText(getApplicationContext(),t.getKey().toString() , Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getApplicationContext(),t.getValue().toString() , Toast.LENGTH_SHORT).show();
-                }
-
-               /* for(int i =0; i< snapshot.getChildren())
-                Log.e("some", "======="+snapshot.getChildren().iterator().next().getValue());
-                Toast.makeText(getApplicationContext(),snapshot.getChildren().iterator().next().getKey().toString() , Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(),snapshot.getChildren().iterator().next().getValue().toString() , Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });*/
-
-
-
-GrabContactsAndUserInfo();
         AlarmReceiver.OnNewLocationListener onNewLocationListener = new AlarmReceiver.OnNewLocationListener() {
             @Override
             public void onNewLocationReceived(String location) {
                 // do something
-                Toast.makeText(MainActivity.this, location, Toast.LENGTH_SHORT)
-                        .show();
-                // then stop listening
-                //  ReceiverPositioningAlarm.clearOnNewLocationListener(this);
-                //  AlarmReceiver.clearOnNewLocationListener(this);
-
-LoationFinder();
-
+                Toast.makeText(MainActivity.this, location, Toast.LENGTH_SHORT).show();
+                        LocationFinder();
             }
         };
 
@@ -177,27 +149,19 @@ LoationFinder();
         AlarmReceiver.setOnNewLocationListener(onNewLocationListener);
 
     }
-    public void LoationFinder() {
-        if(appCurrentlyOpen == true){
+    public void LocationFinder() {
+        if(appCurrentlyOpen){
 
             if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
-
                 mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
                 mRequestingUpdates = true;
                 locationRequestFromUI = true;
-
-
             }
-        }else if(appCurrentlyOpen == false){
+        }else if(!appCurrentlyOpen){
             if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
-
                 mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
                 mRequestingUpdates = true;
-
-
-
             }
-
         }
     }
 
@@ -210,6 +174,7 @@ LoationFinder();
        info.setText("Something");*/
 
     }
+
 
     @Override
     protected void onPause() {
@@ -235,7 +200,6 @@ LoationFinder();
             }
         });
 
-
         mDatabase.child(masterUserKey+"/").child("userDetails").addListenerForSingleValueEvent(new ValueEventListener() {
             String firstName = "";
             String lastName = "";
@@ -248,16 +212,11 @@ LoationFinder();
             public void onDataChange(@NonNull  DataSnapshot snapshot) {
 
                     firstName = (String) snapshot.child("First Name").getValue();
-                   lastName = (String) snapshot.child("Last Name").getValue();
+                    lastName = (String) snapshot.child("Last Name").getValue();
                     eyes = (String) snapshot.child("Eyes").getValue();
                     hair = (String) snapshot.child("Hair").getValue();
                     height = (String) snapshot.child("Height").getValue();
                     weight = (String) snapshot.child("Weight").getValue();
-
-                    Toast.makeText(getApplicationContext(), eyes, Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getApplicationContext(), height, Toast.LENGTH_SHORT).show();
-
-
                     userDetails = new User(eyes,firstName,hair,height,lastName,weight);
             }
 
@@ -293,7 +252,6 @@ LoationFinder();
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted
-
                 } else {
                     // permission denied
                     requestSmsPermission();
@@ -304,7 +262,6 @@ LoationFinder();
     public void TrailTextMessage(String phone, String message){
     SmsManager sms=SmsManager.getDefault();
     sms.sendTextMessage(phone, null, message, null,null);
-
     }
     @Override
     public void LogInNewUserClicked() {
@@ -315,8 +272,7 @@ LoationFinder();
 
     @Override
     public void LogInFieldsEmpty() {
-        Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-    }
+        Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show(); }
 
     @Override
     public void LogInUser(String email, String password) {
@@ -334,14 +290,11 @@ LoationFinder();
 
                 }else{
                     try
-                    {
-                        throw task.getException();
-                    }
+                    { throw task.getException(); }
                     // if user enters wrong email.
                     catch (FirebaseAuthInvalidUserException invalidEmail)
                     {
                         Log.d(TAG, "onComplete: invalid_email");
-
                         // TODO: take your actions!
                         message = "Invalid email entered!";
                     }
@@ -350,7 +303,6 @@ LoationFinder();
                     {
                         Log.d(TAG, "onComplete: wrong_password");
                         message = "Invalid password entered!";
-
                         // TODO: Take your action
                     }
                     catch (Exception e)
@@ -397,25 +349,23 @@ LoationFinder();
     @Override
     public void SignalButtonPushed() {
         firstMessageBeingSent = true;
-
         Button stop  = findViewById(R.id.buttonStopSignal);
         ImageView redButton = findViewById(R.id.imageViewStartSignal);
         TextView info = findViewById(R.id.textViewInsturcutons);
         info.setText(R.string.push_the_red_button_in_case_of_emergency);
-
         stop.setEnabled(true);
         redButton.setEnabled(false);
-           signalButtonIsActive = true;
-           Toast.makeText(this, "WORKING!!!!", Toast.LENGTH_SHORT).show();
-           locationRequestFromUI = true;
+        signalButtonIsActive = true;
+        Toast.makeText(this, "WORKING!!!!", Toast.LENGTH_SHORT).show();
+        locationRequestFromUI = true;
 
 
            if(contactsLog.size() == 0){
                Toast.makeText(this, "Please add a contact before continuing.", Toast.LENGTH_SHORT).show();
            }else{
-               if(appCurrentlyOpen == true){
+               if(appCurrentlyOpen){
                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
-                       if(firstMessageBeingSent == true){
+                       if(firstMessageBeingSent){
                            FirstTextMessage(userDetails, contactsLog);
                        }
                        mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
@@ -431,13 +381,10 @@ LoationFinder();
     }
 
     public void MessageTimer(){
-
         if (alarmManager != null) {
             alarmManager.setInexactRepeating
                     (AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerTime, repeatInterval, notifyPendingIntent);
         }
-
-
     }
 
     @Override
@@ -462,7 +409,7 @@ LoationFinder();
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         Toast.makeText(getApplicationContext(), "You have log out//ADD LOG LAST!", Toast.LENGTH_SHORT).show();
-                        //LOG OUT HERE
+                        //LOG OUT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     }
                 });
         dlgAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -485,9 +432,7 @@ LoationFinder();
             AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
             dlgAlert.setMessage("Are you sure "+phoneNum+ " is the correct number?\n"+f_name+" will be added to your emergency contacts list if you click ok.");
             dlgAlert.setTitle("HelperTracker");
-
             dlgAlert.setCancelable(true);
-
             dlgAlert.setPositiveButton("Ok",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
@@ -507,8 +452,6 @@ LoationFinder();
                             Toast.makeText(getApplicationContext(), "Signal has been sent out, please check with the receiver to confirmed.", Toast.LENGTH_SHORT).show();
                             GrabContactsAndUserInfo();
 
-                           // Toast.makeText(t, phoneNum, Toast.LENGTH_SHORT).show();
-
                         }
                     });
             dlgAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -518,12 +461,7 @@ LoationFinder();
                     Toast.makeText(getApplicationContext(), "Contact was not saved.", Toast.LENGTH_SHORT).show();
                 }
             });
-            //  requestSmsPermission();
-            // exampleTextMessage();
-
             dlgAlert.create().show();
-
-
 
         }
     }
@@ -592,9 +530,6 @@ LoationFinder();
             sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null, userInfo1, null,null);
             sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null, contacts.get(2).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
         }
-
-
-
 
     }
 
@@ -757,17 +692,11 @@ LoationFinder();
 
     }
     @Override
-    public void onProviderEnabled(@NonNull String provider) {
-
-    }
+    public void onProviderEnabled(@NonNull String provider) { }
 
     @Override
-    public void onProviderDisabled(@NonNull String provider) {
-
-    }
+    public void onProviderDisabled(@NonNull String provider) { }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
+    public void onStatusChanged(String provider, int status, Bundle extras) { }
 }
