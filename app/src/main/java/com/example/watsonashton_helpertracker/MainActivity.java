@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LifecycleObserver;
 
 import android.Manifest;
@@ -57,7 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements LifecycleObserver,LogInFragment.LogInListener, SignUpFragment.SignUpListener, NewContactFragment.NewContactListener, HomeScreenFragment.HomeScreenListener, LocationListener,ContactsListFragment.ContactListener, AddNewContactFragment.AddNewContactFragmentListener {
+public class MainActivity extends AppCompatActivity implements LifecycleObserver,LogInFragment.LogInListener, SignUpFragment.SignUpListener, NewContactFragment.NewContactListener, HomeScreenFragment.HomeScreenListener, LocationListener,ContactsListFragment.ContactListener, AddNewContactFragment.AddNewContactFragmentListener, DetailContactFragment.DetailContactFragmentListener, EditFragment.EditFragmentListener {
 private FirebaseDatabase database;
 private DatabaseReference mDatabase;
 private FirebaseAuth mAuth;
@@ -93,6 +94,7 @@ boolean alarmUp;
 PendingIntent notifyPendingIntent;
 AlarmManager alarmManager;
 ContactsAdapter contactsAdapter;
+int  currentContactSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -555,6 +557,211 @@ ContactsAdapter contactsAdapter;
                     .commit();
         }
 
+    }
+
+    @Override
+    public void EditContact() {
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragmentContainer, EditFragment.newInstance(contactsLog.get(currentContactSelected)))
+                .addToBackStack("")
+                .commit();
+
+    }
+
+    @Override
+    public void TrashContact(String firstName, String lastName, String phoneNum) {
+//
+
+        AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
+        dlgAlert.setMessage("Are you sure you want to delete this contact?");
+        dlgAlert.setTitle("HelperTracker");
+        dlgAlert.setCancelable(true);
+        dlgAlert.setPositiveButton("Ok",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        String fullName = firstName+ " "+ lastName;
+
+                        if(currentContactSelected == 0){
+                            HashMap<String, String> contacts = new HashMap<String, String>();
+                            Contacts editContact = new Contacts(fullName, phoneNum);
+                            contactsLog.remove(0);
+
+                            if(contactsLog.size() == 1){
+                                contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                            }else if(contactsLog.size() == 2){
+                                contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                            }else if(contactsLog.size() == 3){
+                                contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                                contacts.put(contactsLog.get(2).getFullName(),contactsLog.get(2).getPhoneNum());
+                            }
+
+                            mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
+
+
+                        }else if(currentContactSelected == 1){
+                            HashMap<String, String> contacts = new HashMap<String, String>();
+                            Contacts editContact = new Contacts(fullName, phoneNum);
+                            contactsLog.remove(1);
+
+                            if(contactsLog.size() == 1){
+                                contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                            }else if(contactsLog.size() == 2){
+                                contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                            }else if(contactsLog.size() == 3){
+                                contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                                contacts.put(contactsLog.get(2).getFullName(),contactsLog.get(2).getPhoneNum());
+                            }
+
+                            mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
+                        }else if(currentContactSelected == 2){
+                            HashMap<String, String> contacts = new HashMap<String, String>();
+                            Contacts editContact = new Contacts(fullName, phoneNum);
+                            contactsLog.remove(2);
+
+                            if(contactsLog.size() == 1){
+                                contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                            }else if(contactsLog.size() == 2){
+                                contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                            }else if(contactsLog.size() == 3){
+                                contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                                contacts.put(contactsLog.get(2).getFullName(),contactsLog.get(2).getPhoneNum());
+                            }
+
+                            mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
+
+                        }
+
+
+                        Toast.makeText(getApplicationContext(), "Contact was deleted.", Toast.LENGTH_SHORT).show();
+                        getSupportFragmentManager().popBackStack();
+                    }
+                });
+        dlgAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(), "Contact was not deleted.", Toast.LENGTH_SHORT).show();
+            }
+        });
+        dlgAlert.create().show();
+
+    }
+
+    @Override
+    public void EditContactFieldEmpty() {
+        Toast.makeText(this, "Please fill out all fields to continue", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void EditContactIsReadyToAdd(String firstName, String lastName, String phoneNum) {
+        if(phoneNum.length() != 10 || phoneNum.contains("(")|| phoneNum.contains(")") || phoneNum.contains("-") || phoneNum.contains("_")){
+            Toast.makeText(this, "Not a valid number please use this format: 123456789", Toast.LENGTH_SHORT).show();
+        }else{
+
+            AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
+            dlgAlert.setMessage("Are you sure "+phoneNum+ " is the correct number?\n"+firstName+" will be added to your emergency contacts list if you click ok.");
+            dlgAlert.setTitle("HelperTracker");
+            dlgAlert.setCancelable(true);
+            dlgAlert.setPositiveButton("Ok",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            String fullName = firstName+ " "+ lastName;
+
+                            if(currentContactSelected == 0){
+                                HashMap<String, String> contacts = new HashMap<String, String>();
+                                Contacts editContact = new Contacts(fullName, phoneNum);
+                                contactsLog.set(0, editContact);
+
+                                if(contactsLog.size() == 1){
+                                    contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                }else if(contactsLog.size() == 2){
+                                    contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                    contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                                }else if(contactsLog.size() == 3){
+                                    contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                    contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                                    contacts.put(contactsLog.get(2).getFullName(),contactsLog.get(2).getPhoneNum());
+                                }
+
+                                mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
+
+
+                            }else if(currentContactSelected == 1){
+                                HashMap<String, String> contacts = new HashMap<String, String>();
+                                Contacts editContact = new Contacts(fullName, phoneNum);
+                                contactsLog.set(1, editContact);
+
+                                if(contactsLog.size() == 1){
+                                    contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                }else if(contactsLog.size() == 2){
+                                    contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                    contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                                }else if(contactsLog.size() == 3){
+                                    contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                    contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                                    contacts.put(contactsLog.get(2).getFullName(),contactsLog.get(2).getPhoneNum());
+                                }
+
+                                mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
+                            }else if(currentContactSelected == 2){
+                                HashMap<String, String> contacts = new HashMap<String, String>();
+                                Contacts editContact = new Contacts(fullName, phoneNum);
+                                contactsLog.set(2, editContact);
+
+                                if(contactsLog.size() == 1){
+                                    contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                }else if(contactsLog.size() == 2){
+                                    contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                    contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                                }else if(contactsLog.size() == 3){
+                                    contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                    contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                                    contacts.put(contactsLog.get(2).getFullName(),contactsLog.get(2).getPhoneNum());
+                                }
+
+                                mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
+
+                            }
+                            Toast.makeText(getApplicationContext(), "Contact was edited and save", Toast.LENGTH_SHORT).show();
+
+
+                            FragmentManager manager = getSupportFragmentManager();
+                            if (manager.getBackStackEntryCount() > 0) {
+                                FragmentManager.BackStackEntry first = manager.getBackStackEntryAt(0);
+                                manager.popBackStack(first.getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                            }
+                        }
+                    });
+            dlgAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Toast.makeText(getApplicationContext(), "Contact was not saved.", Toast.LENGTH_SHORT).show();
+                }
+            });
+            dlgAlert.create().show();
+
+        }
+    }
+
+    @Override
+    public void ContactListItemWasClicked(int contactPosition) {
+
+        currentContactSelected = contactPosition;
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragmentContainer, DetailContactFragment.newInstance(contactsLog.get(contactPosition)))
+                .addToBackStack("")
+                .commit();
     }
 
     public void FirstTextMessage( User user, ArrayList<Contacts> contacts){

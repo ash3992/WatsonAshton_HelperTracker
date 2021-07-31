@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,6 +27,7 @@ public class ContactsListFragment extends ListFragment {
 
     public interface  ContactListener{
        void ContactAdd();
+       void ContactListItemWasClicked(int i);
     }
     @Override
     public void onAttach(@NonNull Context context) {
@@ -70,6 +72,12 @@ public class ContactsListFragment extends ListFragment {
         mListener.ContactAdd();
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onListItemClick(@NonNull ListView l, @NonNull  View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
+        mListener.ContactListItemWasClicked(position);
     }
 
     @Override
