@@ -7,12 +7,10 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleObserver;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,7 +24,6 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -37,6 +34,7 @@ import com.example.watsonashton_helpertracker.fragments.LogInFragment;
 import com.example.watsonashton_helpertracker.fragments.NewContactFragment;
 import com.example.watsonashton_helpertracker.fragments.SignUpFragment;
 import com.example.watsonashton_helpertracker.objects.Contacts;
+import com.example.watsonashton_helpertracker.objects.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -52,7 +50,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,7 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements LifecycleObserver,LogInFragment.LogInListener, SignUpFragment.SignUpListener, NewContactFragment.NewContactListener, HomeScreenFragment.HomeScreenListener, LocationListener {
+public class MainActivity extends AppCompatActivity implements LifecycleObserver,LogInFragment.LogInListener, SignUpFragment.SignUpListener, NewContactFragment.NewContactListener, HomeScreenFragment.HomeScreenListener, LocationListener,ContactsListFragment.ContactListener, AddNewContactFragment.AddNewContactFragmentListener {
 private FirebaseDatabase database;
 private DatabaseReference mDatabase;
 private FirebaseAuth mAuth;
@@ -95,6 +92,7 @@ Intent notifyIntent;
 boolean alarmUp;
 PendingIntent notifyPendingIntent;
 AlarmManager alarmManager;
+ContactsAdapter contactsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -422,6 +420,84 @@ AlarmManager alarmManager;
     }
 
     @Override
+    public void UserClickContactsList() {
+        contactsAdapter = new ContactsAdapter(contactsLog,this);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragmentContainer, ContactsListFragment.newInstance(contactsAdapter))
+                .addToBackStack("")
+                .commit();
+    }
+
+    @Override
+    public void addContactFieldsEmpty() {
+        Toast.makeText(this, "Please fill out all fields to continue", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void addContactReadyToAdd(String f_name, String l_name, String phoneNum) {
+        if(phoneNum.length() != 10 || phoneNum.contains("(")|| phoneNum.contains(")") || phoneNum.contains("-") || phoneNum.contains("_")){
+            Toast.makeText(this, "Not a valid number please use this format: 123456789", Toast.LENGTH_SHORT).show();
+        }else{
+
+            AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
+            dlgAlert.setMessage("Are you sure "+phoneNum+ " is the correct number?\n"+f_name+" will be added to your emergency contacts list if you click ok.");
+            dlgAlert.setTitle("HelperTracker");
+            dlgAlert.setCancelable(true);
+            dlgAlert.setPositiveButton("Ok",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            String fullName = f_name+ " "+ l_name;
+
+                            if(contactsLog.size() == 0){
+                                HashMap<String, String> contacts = new HashMap<String, String>();
+                                contacts.put(fullName, phoneNum);
+                                mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
+                                contactsLog.clear();
+                                for (String i : contacts.keySet()) {
+                                    Contacts m = new Contacts(i, contacts.get(i));
+                                    contactsLog.add(m);
+                                }
+                            }else if(contactsLog.size() == 1){
+                                HashMap<String, String> contacts = new HashMap<String, String>();
+                                contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                contacts.put(fullName, phoneNum);
+                                mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
+                                contactsLog.clear();
+                                for (String i : contacts.keySet()) {
+                                    Contacts m = new Contacts(i, contacts.get(i));
+                                    contactsLog.add(m);
+                                }
+                            }else if(contactsLog.size() == 2){
+                                HashMap<String, String> contacts = new HashMap<String, String>();
+                                contacts.put(contactsLog.get(0).getFullName(),contactsLog.get(0).getPhoneNum());
+                                contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
+                                contacts.put(fullName, phoneNum);
+                                mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
+                                contactsLog.clear();
+                                for (String i : contacts.keySet()) {
+                                    Contacts m = new Contacts(i, contacts.get(i));
+                                    contactsLog.add(m);
+                                }
+
+                            }
+                            getSupportFragmentManager().popBackStack();
+                        }
+                    });
+            dlgAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                  //  positiveButtonPushed = false;
+                    Toast.makeText(getApplicationContext(), "Contact was not saved.", Toast.LENGTH_SHORT).show();
+                }
+            });
+            dlgAlert.create().show();
+
+        }
+    }
+
+    @Override
     public void newContactReadyToAdd(String f_name, String l_name, String phoneNum) {
 
         requestSmsPermission();
@@ -465,6 +541,22 @@ AlarmManager alarmManager;
 
         }
     }
+
+    @Override
+    public void ContactAdd() {
+
+        if(contactsLog.size() >= 3){
+            Toast.makeText(getApplicationContext(), "No more then three contacts are allowed to be added", Toast.LENGTH_SHORT).show();
+        }else{
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.mainFragmentContainer, AddNewContactFragment.newInstance())
+                    .addToBackStack("")
+                    .commit();
+        }
+
+    }
+
     public void FirstTextMessage( User user, ArrayList<Contacts> contacts){
 
         if(contacts.size() == 1){
@@ -660,8 +752,6 @@ AlarmManager alarmManager;
 
             String latText = Double.toString(location.getLatitude());
             String lonText = Double.toString(location.getLongitude());
-
-           // String addyText = address + "\n"+city+" "+state+" "+postalCode;
             String addyText = address;
             time.setText(currentTime.toString());
             lon.setText(lonText);
@@ -699,4 +789,7 @@ AlarmManager alarmManager;
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) { }
+
+
+
 }

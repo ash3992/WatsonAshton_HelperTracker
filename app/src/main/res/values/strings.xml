@@ -30,6 +30,8 @@
     <string name="contacts">contacts</string>
     <string name="profile">profile</string>
     <string name="logout">logOut</string>
+    <string name="contactsadd">contactsAdd</string>
+    <string name="contactsaved">contactSaved</string>
 
 
     <array name="heightArray">

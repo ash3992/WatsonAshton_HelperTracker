@@ -29,6 +29,7 @@ public class HomeScreenFragment extends Fragment {
         void SignalButtonPushed();
         void StopSignalButtonHasBeenPushed();
         void UserLogOut();
+        void UserClickContactsList();
 
     }
 
@@ -67,6 +68,9 @@ public class HomeScreenFragment extends Fragment {
 
         if(item.getItemId() == R.id.log_out_icon){
             mListener.UserLogOut();
+        }
+        if(item.getItemId() == R.id.contacts_icon){
+            mListener.UserClickContactsList();
         }
         return super.onOptionsItemSelected(item);
     }
