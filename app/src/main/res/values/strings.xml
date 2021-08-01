@@ -34,6 +34,18 @@
     <string name="contactsaved">contactSaved</string>
     <string name="editicon">editIcon</string>
     <string name="trash">trash</string>
+    <string name="first_names">First Name:</string>
+    <string name="hair">hair</string>
+
+    <string name="eye">eye</string>
+
+    <string name="weights">weight</string>
+
+    <string name="last">last</string>
+    <string name="heights">height</string>
+
+    <string name="last_names">Last Name:</string>
+    <string name="first">first</string>
 
 
     <array name="heightArray">

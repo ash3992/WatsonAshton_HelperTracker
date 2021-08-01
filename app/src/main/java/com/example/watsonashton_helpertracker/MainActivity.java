@@ -30,12 +30,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.watsonashton_helpertracker.adapters.ContactsAdapter;
+import com.example.watsonashton_helpertracker.fragments.AddNewContactFragment;
+import com.example.watsonashton_helpertracker.fragments.ContactsListFragment;
+import com.example.watsonashton_helpertracker.fragments.DetailContactFragment;
+import com.example.watsonashton_helpertracker.fragments.EditFragment;
 import com.example.watsonashton_helpertracker.fragments.HomeScreenFragment;
 import com.example.watsonashton_helpertracker.fragments.LogInFragment;
 import com.example.watsonashton_helpertracker.fragments.NewContactFragment;
 import com.example.watsonashton_helpertracker.fragments.SignUpFragment;
 import com.example.watsonashton_helpertracker.objects.Contacts;
 import com.example.watsonashton_helpertracker.objects.User;
+import com.example.watsonashton_helpertracker.receivers.AlarmReceiver;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -58,7 +64,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements LifecycleObserver,LogInFragment.LogInListener, SignUpFragment.SignUpListener, NewContactFragment.NewContactListener, HomeScreenFragment.HomeScreenListener, LocationListener,ContactsListFragment.ContactListener, AddNewContactFragment.AddNewContactFragmentListener, DetailContactFragment.DetailContactFragmentListener, EditFragment.EditFragmentListener {
+public class MainActivity extends AppCompatActivity implements LifecycleObserver,LogInFragment.LogInListener, SignUpFragment.SignUpListener, NewContactFragment.NewContactListener, HomeScreenFragment.HomeScreenListener, LocationListener, ContactsListFragment.ContactListener, AddNewContactFragment.AddNewContactFragmentListener, DetailContactFragment.DetailContactFragmentListener, EditFragment.EditFragmentListener {
 private FirebaseDatabase database;
 private DatabaseReference mDatabase;
 private FirebaseAuth mAuth;
@@ -67,7 +73,7 @@ private static final  int REQUEST_LOCATION_PERMISSIONS = 0x01001;
 private NotificationManager mNotificationManager;
 private static final int NOTIFICATION_ID = 0;
 private static final String PRIMARY_CHANNEL_ID = "primary_notification_channel";
-long repeatInterval = 1*60*1000;
+long repeatInterval = 5*60*1000;
 long triggerTime = SystemClock.elapsedRealtime() + repeatInterval;
 private static final ArrayList<Contacts> contactsLog = new ArrayList<>();
 LocationManager mLocationManger;
@@ -95,6 +101,10 @@ PendingIntent notifyPendingIntent;
 AlarmManager alarmManager;
 ContactsAdapter contactsAdapter;
 int  currentContactSelected;
+String currentRealTime = "";
+String currentLat = "";
+String currentLon = "";
+String currentAddress = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,11 +121,6 @@ int  currentContactSelected;
         notifyPendingIntent = PendingIntent.getBroadcast(this, NOTIFICATION_ID, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-      // getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
-       //        LogInFragment.newInstance()).commit();
-        getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
-               HomeScreenFragment.newInstance()).commit();
-
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null){
             String name = user.getEmail();
@@ -130,10 +135,15 @@ int  currentContactSelected;
             }
             masterUserKey = userKey;
             Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
+                    HomeScreenFragment.newInstance()).commit();
         }else{
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
+                           LogInFragment.newInstance()).commit();
 
         }
         requestLocationPermissions();
+        requestSmsPermission();
         GrabContactsAndUserInfo();
 
         AlarmReceiver.OnNewLocationListener onNewLocationListener = new AlarmReceiver.OnNewLocationListener() {
@@ -169,9 +179,19 @@ int  currentContactSelected;
     protected void onResume() {
         super.onResume();
         appCurrentlyOpen = true;
-        /*
-        TextView info = findViewById(R.id.editTextFirstContactPhoneNumber);
-       info.setText("Something");*/
+
+
+
+        TextView addressText = findViewById(R.id.textViewAddressFillIn);
+        TextView latText = findViewById(R.id.textViewLatFillIn);
+        TextView lonText = findViewById(R.id.textViewLonFillIn);
+        TextView timeText = findViewById(R.id.textViewLastUpdateTimeFillIn);
+        if(addressText != null && latText != null && lonText != null && timeText != null){
+            addressText.setText(currentAddress);
+            latText.setText(currentLat);
+            lonText.setText(currentLon);
+            timeText.setText(currentRealTime);
+        }
 
     }
 
@@ -348,6 +368,7 @@ int  currentContactSelected;
     }
     @Override
     public void SignalButtonPushed() {
+      //  requestSmsPermission();
         firstMessageBeingSent = true;
         Button stop  = findViewById(R.id.buttonStopSignal);
         ImageView redButton = findViewById(R.id.imageViewStartSignal);
@@ -389,6 +410,10 @@ int  currentContactSelected;
 
     @Override
     public void StopSignalButtonHasBeenPushed() {
+        mNotificationManager.cancelAll();
+        if (alarmManager != null) {
+            alarmManager.cancel(notifyPendingIntent);
+        }
         firstMessageBeingSent = false;
         Button stop  = findViewById(R.id.buttonStopSignal);
         ImageView redButton = findViewById(R.id.imageViewStartSignal);
@@ -408,8 +433,14 @@ int  currentContactSelected;
         dlgAlert.setPositiveButton("Yes",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getApplicationContext(), "You have log out//ADD LOG LAST!", Toast.LENGTH_SHORT).show();
-                        //LOG OUT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        Toast.makeText(getApplicationContext(), "You have log out", Toast.LENGTH_SHORT).show();
+                        FirebaseAuth.getInstance().signOut();
+                        //HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.mainFragmentContainer, LogInFragment.newInstance())
+                                .commit();
                     }
                 });
         dlgAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -429,6 +460,17 @@ int  currentContactSelected;
                 .replace(R.id.mainFragmentContainer, ContactsListFragment.newInstance(contactsAdapter))
                 .addToBackStack("")
                 .commit();
+    }
+
+    @Override
+    public void ProfileIconClick() {
+      //  userDetails;
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragmentContainer, ProfileFragment.newInstance(userDetails))
+                .addToBackStack("")
+                .commit();
+
     }
 
     @Override
@@ -529,6 +571,8 @@ int  currentContactSelected;
                             mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
                             Toast.makeText(getApplicationContext(), "Signal has been sent out, please check with the receiver to confirmed.", Toast.LENGTH_SHORT).show();
                             GrabContactsAndUserInfo();
+                            getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
+                                    HomeScreenFragment.newInstance()).commit();
 
                         }
                     });
@@ -561,7 +605,6 @@ int  currentContactSelected;
 
     @Override
     public void EditContact() {
-
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainFragmentContainer, EditFragment.newInstance(contactsLog.get(currentContactSelected)))
@@ -572,7 +615,6 @@ int  currentContactSelected;
 
     @Override
     public void TrashContact(String firstName, String lastName, String phoneNum) {
-//
 
         AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
         dlgAlert.setMessage("Are you sure you want to delete this contact?");
@@ -639,8 +681,6 @@ int  currentContactSelected;
                             mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
 
                         }
-
-
                         Toast.makeText(getApplicationContext(), "Contact was deleted.", Toast.LENGTH_SHORT).show();
                         getSupportFragmentManager().popBackStack();
                     }
@@ -652,7 +692,6 @@ int  currentContactSelected;
             }
         });
         dlgAlert.create().show();
-
     }
 
     @Override
@@ -754,9 +793,7 @@ int  currentContactSelected;
 
     @Override
     public void ContactListItemWasClicked(int contactPosition) {
-
         currentContactSelected = contactPosition;
-
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainFragmentContainer, DetailContactFragment.newInstance(contactsLog.get(contactPosition)))
@@ -913,7 +950,10 @@ int  currentContactSelected;
             masterUserKey = userKey;
             message = "Welcome back!";
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+
             GrabContactsAndUserInfo();
+            getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
+                    HomeScreenFragment.newInstance()).commit();
         }
 
     }
@@ -967,6 +1007,10 @@ int  currentContactSelected;
             info.setText(R.string.stop_singal);
             SendOutLocation(latText, lonText, addyText);
 
+            currentAddress = address;
+            currentLat = latText;
+            currentLon = lonText;
+            currentRealTime = currentTime.toString();
 
             if(mRequestingUpdates){
                 mRequestingUpdates = false;
@@ -976,9 +1020,15 @@ int  currentContactSelected;
         }
 
         if(appCurrentlyOpen == false){
+            Date currentTime = Calendar.getInstance().getTime();
             String latText = Double.toString(location.getLatitude());
             String lonText = Double.toString(location.getLongitude());
             String addyText = address;
+            currentAddress = address;
+            currentLat = latText;
+            currentLon = lonText;
+            currentRealTime = currentTime.toString();
+
             SendOutLocation(latText, lonText, addyText);
             if(mRequestingUpdates){
                 mRequestingUpdates = false;

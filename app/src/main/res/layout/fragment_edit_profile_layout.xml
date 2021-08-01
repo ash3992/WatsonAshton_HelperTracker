@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textViewFirst"
+        android:layout_width="114dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="100dp"
+        android:text="@string/first_names"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewHairPlaceHolder"
+        android:layout_width="114dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/hair"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@+id/textViewHair"
+        app:layout_constraintTop_toBottomOf="@+id/textViewHair" />
+
+    <TextView
+        android:id="@+id/textViewEye"
+        android:layout_width="114dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/eye_color"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/textViewHairPlaceHolder"
+        app:layout_constraintTop_toBottomOf="@+id/textViewHairPlaceHolder" />
+
+    <TextView
+        android:id="@+id/textViewEyePlaceHolder"
+        android:layout_width="114dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/eye"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@+id/textViewEye"
+        app:layout_constraintTop_toBottomOf="@+id/textViewEye" />
+
+    <TextView
+        android:id="@+id/textViewWeight"
+        android:layout_width="114dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/weight"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/textViewHeightPlaceHolder"
+        app:layout_constraintTop_toBottomOf="@+id/textViewHeightPlaceHolder" />
+
+    <TextView
+        android:id="@+id/textViewWeightPlaceHolder"
+        android:layout_width="114dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/weights"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@+id/textViewWeight"
+        app:layout_constraintTop_toBottomOf="@+id/textViewWeight" />
+
+    <TextView
+        android:id="@+id/textViewHair"
+        android:layout_width="114dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/hair_color"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/textViewWeightPlaceHolder"
+        app:layout_constraintTop_toBottomOf="@+id/textViewWeightPlaceHolder" />
+
+    <TextView
+        android:id="@+id/textViewHeightPlaceHolder"
+        android:layout_width="114dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/heights"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@+id/textViewHeight"
+        app:layout_constraintTop_toBottomOf="@+id/textViewHeight" />
+
+    <TextView
+        android:id="@+id/textViewLastPlaceHolder"
+        android:layout_width="242dp"
+        android:layout_height="27dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/last"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@+id/textViewLast"
+        app:layout_constraintTop_toBottomOf="@+id/textViewLast" />
+
+    <TextView
+        android:id="@+id/textViewHeight"
+        android:layout_width="114dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/height"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/textViewLastPlaceHolder"
+        app:layout_constraintTop_toBottomOf="@+id/textViewLastPlaceHolder" />
+
+    <TextView
+        android:id="@+id/textViewLast"
+        android:layout_width="114dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/last_names"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/textViewFirstPlaceHolder"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFirstPlaceHolder" />
+
+    <TextView
+        android:id="@+id/textViewFirstPlaceHolder"
+        android:layout_width="240dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/first"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@+id/textViewFirst"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFirst" />
+</androidx.constraintlayout.widget.ConstraintLayout>
