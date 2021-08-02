@@ -4,7 +4,7 @@
 
     <item
         android:id = "@+id/add_contact_icon"
-        android:title="@string/contactsadd"
+        android:title="@string/contactsAdd"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_baseline_add_circle_24"/>
 

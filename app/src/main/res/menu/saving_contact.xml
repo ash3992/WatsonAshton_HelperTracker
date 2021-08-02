@@ -4,7 +4,7 @@
 
     <item
         android:id = "@+id/saving_new_contact"
-        android:title="@string/contactsaved"
+        android:title="@string/contactSaved"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_baseline_save_24"/>
 </menu>

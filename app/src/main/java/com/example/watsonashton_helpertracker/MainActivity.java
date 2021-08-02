@@ -377,7 +377,6 @@ String currentAddress = "";
         stop.setEnabled(true);
         redButton.setEnabled(false);
         signalButtonIsActive = true;
-        Toast.makeText(this, "WORKING!!!!", Toast.LENGTH_SHORT).show();
         locationRequestFromUI = true;
 
 

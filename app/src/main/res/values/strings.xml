@@ -30,9 +30,9 @@
     <string name="contacts">contacts</string>
     <string name="profile">profile</string>
     <string name="logout">logOut</string>
-    <string name="contactsadd">contactsAdd</string>
-    <string name="contactsaved">contactSaved</string>
-    <string name="editicon">editIcon</string>
+    <string name="contactsAdd">contactsAdd</string>
+    <string name="contactSaved">contactSaved</string>
+    <string name="editIcon">editIcon</string>
     <string name="trash">trash</string>
     <string name="first_names">First Name:</string>
     <string name="hair">hair</string>
