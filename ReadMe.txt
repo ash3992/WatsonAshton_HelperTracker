@@ -1,18 +1,21 @@
-Alpha Deliverable
+Release Candidate
 •Installation instructions
-To test the application you will need an up to date Xcode on your computer.
+To test the application you will need an up to date Android Studio on your computer and an android phone with a SIM card to see text messages.
 
 •Login requirements
-The account that I have save to the database is Email: test@test.com and Password: testpaassword*1.
+The account that I have save to the database is Email: ashtofn@gmail.com and Password: 38euhg)
+You can always make your own account as well. 
 
 •List of known bugs
-Join session feature is not complete if pressed program will crash. Will be done in near future. 
-
-•Special Requirements
-When testing on a device please use an iPhone 8 Plus. No constraints have been added to to the project as of yet. Also when on GitHub the correct folder is titled "Watson_Ashton_Restaurant". When you initially run the project it takes about five minutes to start working. Every other time after that it works fine and doesn't take long to start. 
+If the app is killed while text messages are being sent out notifications will still be sent to the phone user.
 
 
 •GitHub
-https://github.com/ash3992/ProjectAndPortfolioIV.git
+https://github.com/ash3992/WatsonAshton_HelperTracker.git
+
+•YouTube
+https://www.youtube.com/watch?v=MDIPiqzR844
+Above is a link of a walkthrough of the app working.
+
 
 
