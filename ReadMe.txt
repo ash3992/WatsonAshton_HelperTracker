@@ -1,4 +1,8 @@
 Release Candidate
+
+•Description
+Android base project currently in development. The application helps people when in uncomfortable or dangerous situations by sending texts messages of their current location to their emergency contacts with the click of a single button.
+
 •Installation instructions
 To test the application you will need an up-to-date Android Studio on your computer and an android phone with a SIM card to see text messages.
 
