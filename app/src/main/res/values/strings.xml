@@ -36,13 +36,22 @@
     <string name="trash">trash</string>
     <string name="first_names">First Name:</string>
     <string name="hair">hair</string>
-
+    <string name="Please_fill_in_all_fields">Please fill in all fields</string>
+    <string name="Please_fill_out_all_fields_to_continue.">Please fill out all fields to continue."</string>
     <string name="eye">eye</string>
-
+    <string name="Please_add_a_contact_before_continuing.">Please add a contact before continuing.</string>
+    <string name="You_have_log_out">You have log out</string>
+    <string name="You_didnt_log_out">You didn\'t log out</string>
     <string name="weights">weight</string>
-
+    <string name="Not_a_valid_number_please_use_this_format_123456789">Not a valid number please use this format: 123456789</string>
+    <string name="Contact_was_not_saved.">"Contact was not saved.</string>
     <string name="last">last</string>
     <string name="heights">height</string>
+    <string name="Signal_has_been_sent_out_please_check_with_the_receiver_to_confirmed.">Signal has been sent out, please check with the receiver to confirmed.</string>
+    <string name="No_more_then_three_contacts_are_allowed_to_be_added">No more then three contacts are allowed to be added</string>
+    <string name="Contact_was_edited_and_save">Contact was edited and save</string>
+    <string name="Log_In">Log In</string>
+
 
     <string name="last_names">Last Name:</string>
     <string name="first">first</string>

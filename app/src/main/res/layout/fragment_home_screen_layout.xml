@@ -7,8 +7,8 @@
 
     <TextView
         android:id="@+id/textViewAddress"
-        android:layout_width="72dp"
-        android:layout_height="22dp"
+        android:layout_width="80dp"
+        android:layout_height="25dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="140dp"
         android:text="@string/address"
@@ -20,8 +20,8 @@
 
     <TextView
         android:id="@+id/textViewLon"
-        android:layout_width="40dp"
-        android:layout_height="21dp"
+        android:layout_width="42dp"
+        android:layout_height="27dp"
         android:layout_marginTop="16dp"
         android:text="@string/lon"
         android:textColor="@color/black"
@@ -32,25 +32,25 @@
 
     <TextView
         android:id="@+id/textViewLastUpdateTime"
-        android:layout_width="153dp"
-        android:layout_height="21dp"
+        android:layout_width="183dp"
+        android:layout_height="23dp"
         android:layout_marginTop="16dp"
         android:text="@string/last_update_time"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="@+id/textViewLon"
         app:layout_constraintTop_toBottomOf="@+id/textViewLon" />
 
     <TextView
         android:id="@+id/textViewInsturcutons"
-        android:layout_width="314dp"
-        android:layout_height="63dp"
-        android:layout_marginStart="48dp"
-        android:layout_marginTop="224dp"
+        android:layout_width="323dp"
+        android:layout_height="97dp"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="220dp"
         android:text="@string/push_the_red_button_in_case_of_emergency"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewLastUpdateTime" />
@@ -71,8 +71,8 @@
         android:id="@+id/buttonStopSignal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="136dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginStart="128dp"
+        android:layout_marginTop="8dp"
         android:enabled="false"
         android:text="@string/stop_signal"
         app:layout_constraintStart_toStartOf="parent"
@@ -119,7 +119,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="80dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="32dp"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintBottom_toTopOf="@+id/textViewInsturcutons"

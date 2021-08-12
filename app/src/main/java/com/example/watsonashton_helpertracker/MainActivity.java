@@ -38,6 +38,7 @@ import com.example.watsonashton_helpertracker.fragments.EditFragment;
 import com.example.watsonashton_helpertracker.fragments.HomeScreenFragment;
 import com.example.watsonashton_helpertracker.fragments.LogInFragment;
 import com.example.watsonashton_helpertracker.fragments.NewContactFragment;
+import com.example.watsonashton_helpertracker.fragments.ProfileFragment;
 import com.example.watsonashton_helpertracker.fragments.SignUpFragment;
 import com.example.watsonashton_helpertracker.objects.Contacts;
 import com.example.watsonashton_helpertracker.objects.User;
@@ -72,7 +73,6 @@ private static final int PERMISSION_SEND_SMS = 123;
 private static final  int REQUEST_LOCATION_PERMISSIONS = 0x01001;
 private NotificationManager mNotificationManager;
 private static final int NOTIFICATION_ID = 0;
-private static final String PRIMARY_CHANNEL_ID = "primary_notification_channel";
 long repeatInterval = 5*60*1000;
 long triggerTime = SystemClock.elapsedRealtime() + repeatInterval;
 private static final ArrayList<Contacts> contactsLog = new ArrayList<>();
@@ -145,11 +145,9 @@ String currentAddress = "";
         requestLocationPermissions();
         requestSmsPermission();
         GrabContactsAndUserInfo();
-
         AlarmReceiver.OnNewLocationListener onNewLocationListener = new AlarmReceiver.OnNewLocationListener() {
             @Override
             public void onNewLocationReceived(String location) {
-                // do something
                 Toast.makeText(MainActivity.this, location, Toast.LENGTH_SHORT).show();
                         LocationFinder();
             }
@@ -160,15 +158,17 @@ String currentAddress = "";
 
     }
     public void LocationFinder() {
+        //Checking location permission
         if(appCurrentlyOpen){
-
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
+            if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
                 mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
                 mRequestingUpdates = true;
                 locationRequestFromUI = true;
             }
         }else if(!appCurrentlyOpen){
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
+            if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
                 mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
                 mRequestingUpdates = true;
             }
@@ -179,9 +179,6 @@ String currentAddress = "";
     protected void onResume() {
         super.onResume();
         appCurrentlyOpen = true;
-
-
-
         TextView addressText = findViewById(R.id.textViewAddressFillIn);
         TextView latText = findViewById(R.id.textViewLatFillIn);
         TextView lonText = findViewById(R.id.textViewLonFillIn);
@@ -204,7 +201,6 @@ String currentAddress = "";
 
     private void GrabContactsAndUserInfo(){
         contactsLog.clear();
-      //  masterUserKey+"/"
         mDatabase.child(masterUserKey+"/").child("contacts/").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -249,22 +245,21 @@ String currentAddress = "";
     }
 
     private  void requestLocationPermissions(){
-       if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=  PackageManager.PERMISSION_GRANTED){
+        //Checks to see if we have location permission
+       if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+               !=  PackageManager.PERMISSION_GRANTED){
            ActivityCompat.requestPermissions(this,
                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                   REQUEST_LOCATION_PERMISSIONS);
        }
     }
     private void requestSmsPermission() {
-        // check permission is given
-        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-            // request permission (see result in onRequestPermissionsResult() method)
+        // check permission is given for messages being sent out
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.SEND_SMS},
                     PERMISSION_SEND_SMS);
-        } else {
-            // permission already granted run sms send
-          //  TrailTextMessage();
         }
     }
     @Override
@@ -285,6 +280,7 @@ String currentAddress = "";
     }
     @Override
     public void LogInNewUserClicked() {
+        //Segue to Sign up Fragment
         Toast.makeText(this, "Sign Up", Toast.LENGTH_SHORT).show();
         getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
                 SignUpFragment.newInstance()).commit();
@@ -292,10 +288,12 @@ String currentAddress = "";
 
     @Override
     public void LogInFieldsEmpty() {
-        Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show(); }
+        //Message to user
+        Toast.makeText(this, R.string.Please_fill_in_all_fields, Toast.LENGTH_SHORT).show(); }
 
     @Override
     public void LogInUser(String email, String password) {
+
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -307,6 +305,7 @@ String currentAddress = "";
                     userFromLogin = true;
                     userFromNewAccount = false;
                     updateUI(user);
+                    message = "....";
 
                 }else{
                     try
@@ -332,24 +331,25 @@ String currentAddress = "";
                 }
             }
         });
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
 
     @Override
     public void SignUpAlreadyAnUserClicked() {
-        Toast.makeText(this, "Log In", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.Log_In, Toast.LENGTH_SHORT).show();
         getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
                 LogInFragment.newInstance()).commit();
     }
 
     @Override
     public void SignUpInfoEmpty() {
-        Toast.makeText(this, "Please fill out all fields to continue.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.Please_fill_out_all_fields_to_continue_, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void SignUpInfoNotEmpty(String fname, String lname, String email, String password, String uHeight, String uHair, String uEye, String weight) {
+        //Create sign up variables
         testRunFirstName = fname;
         testRunLastName = lname;
         users.put("First Name", fname);
@@ -364,11 +364,11 @@ String currentAddress = "";
     }
     @Override
     public void newContactFieldsEmpty() {
-        Toast.makeText(this, "Please fill out all fields to continue", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.Please_fill_out_all_fields_to_continue_, Toast.LENGTH_SHORT).show();
     }
     @Override
     public void SignalButtonPushed() {
-      //  requestSmsPermission();
+     //Big red button push
         firstMessageBeingSent = true;
         Button stop  = findViewById(R.id.buttonStopSignal);
         ImageView redButton = findViewById(R.id.imageViewStartSignal);
@@ -381,13 +381,15 @@ String currentAddress = "";
 
 
            if(contactsLog.size() == 0){
-               Toast.makeText(this, "Please add a contact before continuing.", Toast.LENGTH_SHORT).show();
+               Toast.makeText(this, R.string.Please_add_a_contact_before_continuing_, Toast.LENGTH_SHORT).show();
            }else{
                if(appCurrentlyOpen){
-                   if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
+                   if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                           == PackageManager.PERMISSION_GRANTED && !mRequestingUpdates) {
                        if(firstMessageBeingSent){
                            FirstTextMessage(userDetails, contactsLog);
                        }
+                       //Location info
                        mLocationManger.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10.0f, this);
                        mRequestingUpdates = true;
                        MessageTimer();
@@ -401,6 +403,7 @@ String currentAddress = "";
     }
 
     public void MessageTimer(){
+        //Turns off notification timer
         if (alarmManager != null) {
             alarmManager.setInexactRepeating
                     (AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerTime, repeatInterval, notifyPendingIntent);
@@ -425,6 +428,7 @@ String currentAddress = "";
 
     @Override
     public void UserLogOut() {
+        //Logs the current user out
         AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
         dlgAlert.setMessage("Are you sure you want to Log Out?");
         dlgAlert.setTitle("Log Out");
@@ -432,10 +436,10 @@ String currentAddress = "";
         dlgAlert.setPositiveButton("Yes",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getApplicationContext(), "You have log out", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), R.string.You_have_log_out, Toast.LENGTH_SHORT).show();
                         FirebaseAuth.getInstance().signOut();
-                        //HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+                        //Takes user to logOut Fragment
                         getSupportFragmentManager()
                                 .beginTransaction()
                                 .replace(R.id.mainFragmentContainer, LogInFragment.newInstance())
@@ -445,7 +449,7 @@ String currentAddress = "";
         dlgAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(getApplicationContext(), "You didn't log out", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), R.string.You_didnt_log_out, Toast.LENGTH_SHORT).show();
             }
         });
         dlgAlert.create().show();
@@ -453,6 +457,7 @@ String currentAddress = "";
 
     @Override
     public void UserClickContactsList() {
+        //Takes user to contacts fragment
         contactsAdapter = new ContactsAdapter(contactsLog,this);
         getSupportFragmentManager()
                 .beginTransaction()
@@ -463,7 +468,7 @@ String currentAddress = "";
 
     @Override
     public void ProfileIconClick() {
-      //  userDetails;
+      //Takes user to Profile fragment
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainFragmentContainer, ProfileFragment.newInstance(userDetails))
@@ -474,17 +479,23 @@ String currentAddress = "";
 
     @Override
     public void addContactFieldsEmpty() {
-        Toast.makeText(this, "Please fill out all fields to continue", Toast.LENGTH_SHORT).show();
+        //Contacts field empty
+        Toast.makeText(this,
+                R.string.Please_fill_out_all_fields_to_continue_, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void addContactReadyToAdd(String f_name, String l_name, String phoneNum) {
-        if(phoneNum.length() != 10 || phoneNum.contains("(")|| phoneNum.contains(")") || phoneNum.contains("-") || phoneNum.contains("_")){
-            Toast.makeText(this, "Not a valid number please use this format: 123456789", Toast.LENGTH_SHORT).show();
+        if(phoneNum.length() != 10 || phoneNum.contains("(")|| phoneNum.contains(")")
+                || phoneNum.contains("-") || phoneNum.contains("_")){
+            //Phone number is not formatted correctly
+            Toast.makeText(this,
+                    R.string.Not_a_valid_number_please_use_this_format_123456789, Toast.LENGTH_SHORT).show();
         }else{
-
+            //Adds the contact to firebase database
             AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
-            dlgAlert.setMessage("Are you sure "+phoneNum+ " is the correct number?\n"+f_name+" will be added to your emergency contacts list if you click ok.");
+            dlgAlert.setMessage("Are you sure "+phoneNum+ " is the correct number?\n"+f_name+" will " +
+                    "be added to your emergency contacts list if you click ok.");
             dlgAlert.setTitle("HelperTracker");
             dlgAlert.setCancelable(true);
             dlgAlert.setPositiveButton("Ok",
@@ -531,34 +542,38 @@ String currentAddress = "";
             dlgAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                  //  positiveButtonPushed = false;
-                    Toast.makeText(getApplicationContext(), "Contact was not saved.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), R.string.Contact_was_not_saved_, Toast.LENGTH_SHORT).show();
                 }
             });
             dlgAlert.create().show();
-
         }
     }
 
     @Override
     public void newContactReadyToAdd(String f_name, String l_name, String phoneNum) {
 
+        //first contact being added to database
         requestSmsPermission();
-        if(phoneNum.length() != 10 || phoneNum.contains("(")|| phoneNum.contains(")") || phoneNum.contains("-") || phoneNum.contains("_")){
-            Toast.makeText(this, "Not a valid number please use this format: 123456789", Toast.LENGTH_SHORT).show();
+        if(phoneNum.length() != 10 || phoneNum.contains("(")|| phoneNum.contains(")")
+                || phoneNum.contains("-") || phoneNum.contains("_")){
+            //Phone number is not formatted correctly
+            Toast.makeText(this, R.string.Not_a_valid_number_please_use_this_format_123456789, Toast.LENGTH_SHORT).show();
         }else{
-
+            //Adds the contact to firebase database
             AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
-            dlgAlert.setMessage("Are you sure "+phoneNum+ " is the correct number?\n"+f_name+" will be added to your emergency contacts list if you click ok.");
+            dlgAlert.setMessage("Are you sure "+phoneNum+ " is the correct number?\n"+f_name+" " +
+                    "will be added to your emergency contacts list if you click ok.");
             dlgAlert.setTitle("HelperTracker");
             dlgAlert.setCancelable(true);
             dlgAlert.setPositiveButton("Ok",
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
+
+                            //Sends out text message
                             positiveButtonPushed = true;
-                            //dismiss the dialog
                             String message1 = "This is a practice signal sent by "+testRunFirstName+" "+ testRunLastName+" through TrackerHelper";
-                            String message2 = f_name+" if "+testRunFirstName+ " is ever in trouble you'll receive a text message similar to this with his/her current location.";
+                            String message2 = f_name+" if "+testRunFirstName+ " is ever in trouble " +
+                                    "you'll receive a text message similar to this with his/her current location.";
                             String message3 = "No further action is needed at this time. Thank you.";
 
                             TrailTextMessage(phoneNum, message1);
@@ -568,8 +583,10 @@ String currentAddress = "";
 
                             contacts.put(fullName, phoneNum);
                             mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
-                            Toast.makeText(getApplicationContext(), "Signal has been sent out, please check with the receiver to confirmed.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(),
+                                    R.string.Signal_has_been_sent_out_please_check_with_the_receiver_to_confirmed_, Toast.LENGTH_SHORT).show();
                             GrabContactsAndUserInfo();
+                            //Takes user to home screen
                             getSupportFragmentManager().beginTransaction().replace(R.id.mainFragmentContainer,
                                     HomeScreenFragment.newInstance()).commit();
 
@@ -579,11 +596,11 @@ String currentAddress = "";
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     positiveButtonPushed = false;
-                    Toast.makeText(getApplicationContext(), "Contact was not saved.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),
+                            R.string.Contact_was_not_saved_, Toast.LENGTH_SHORT).show();
                 }
             });
             dlgAlert.create().show();
-
         }
     }
 
@@ -591,8 +608,11 @@ String currentAddress = "";
     public void ContactAdd() {
 
         if(contactsLog.size() >= 3){
-            Toast.makeText(getApplicationContext(), "No more then three contacts are allowed to be added", Toast.LENGTH_SHORT).show();
+            //Contact list is full
+            Toast.makeText(getApplicationContext(),
+                    R.string.No_more_then_three_contacts_are_allowed_to_be_added, Toast.LENGTH_SHORT).show();
         }else{
+            //Take user to contact fragment
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.mainFragmentContainer, AddNewContactFragment.newInstance())
@@ -604,6 +624,7 @@ String currentAddress = "";
 
     @Override
     public void EditContact() {
+        //Take user to edit fragment
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainFragmentContainer, EditFragment.newInstance(contactsLog.get(currentContactSelected)))
@@ -615,6 +636,7 @@ String currentAddress = "";
     @Override
     public void TrashContact(String firstName, String lastName, String phoneNum) {
 
+        //Deletes contact selected from firebase
         AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
         dlgAlert.setMessage("Are you sure you want to delete this contact?");
         dlgAlert.setTitle("HelperTracker");
@@ -623,11 +645,8 @@ String currentAddress = "";
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
-                        String fullName = firstName+ " "+ lastName;
-
                         if(currentContactSelected == 0){
                             HashMap<String, String> contacts = new HashMap<String, String>();
-                            Contacts editContact = new Contacts(fullName, phoneNum);
                             contactsLog.remove(0);
 
                             if(contactsLog.size() == 1){
@@ -640,13 +659,11 @@ String currentAddress = "";
                                 contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
                                 contacts.put(contactsLog.get(2).getFullName(),contactsLog.get(2).getPhoneNum());
                             }
-
                             mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
-
 
                         }else if(currentContactSelected == 1){
                             HashMap<String, String> contacts = new HashMap<String, String>();
-                            Contacts editContact = new Contacts(fullName, phoneNum);
+
                             contactsLog.remove(1);
 
                             if(contactsLog.size() == 1){
@@ -659,11 +676,10 @@ String currentAddress = "";
                                 contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
                                 contacts.put(contactsLog.get(2).getFullName(),contactsLog.get(2).getPhoneNum());
                             }
-
                             mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
+
                         }else if(currentContactSelected == 2){
                             HashMap<String, String> contacts = new HashMap<String, String>();
-                            Contacts editContact = new Contacts(fullName, phoneNum);
                             contactsLog.remove(2);
 
                             if(contactsLog.size() == 1){
@@ -676,7 +692,6 @@ String currentAddress = "";
                                 contacts.put(contactsLog.get(1).getFullName(),contactsLog.get(1).getPhoneNum());
                                 contacts.put(contactsLog.get(2).getFullName(),contactsLog.get(2).getPhoneNum());
                             }
-
                             mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
 
                         }
@@ -695,17 +710,19 @@ String currentAddress = "";
 
     @Override
     public void EditContactFieldEmpty() {
-        Toast.makeText(this, "Please fill out all fields to continue", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.Please_fill_out_all_fields_to_continue_, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void EditContactIsReadyToAdd(String firstName, String lastName, String phoneNum) {
+        //Adds edited contact to firebase
         if(phoneNum.length() != 10 || phoneNum.contains("(")|| phoneNum.contains(")") || phoneNum.contains("-") || phoneNum.contains("_")){
-            Toast.makeText(this, "Not a valid number please use this format: 123456789", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.Not_a_valid_number_please_use_this_format_123456789, Toast.LENGTH_SHORT).show();
         }else{
 
             AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(this);
-            dlgAlert.setMessage("Are you sure "+phoneNum+ " is the correct number?\n"+firstName+" will be added to your emergency contacts list if you click ok.");
+            dlgAlert.setMessage("Are you sure "+phoneNum+ " is the correct number?\n"+firstName+" " +
+                    "will be added to your emergency contacts list if you click ok.");
             dlgAlert.setTitle("HelperTracker");
             dlgAlert.setCancelable(true);
             dlgAlert.setPositiveButton("Ok",
@@ -769,7 +786,7 @@ String currentAddress = "";
                                 mDatabase.child(masterUserKey).child("contacts").setValue(contacts);
 
                             }
-                            Toast.makeText(getApplicationContext(), "Contact was edited and save", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), R.string.Contact_was_edited_and_save, Toast.LENGTH_SHORT).show();
 
 
                             FragmentManager manager = getSupportFragmentManager();
@@ -782,7 +799,7 @@ String currentAddress = "";
             dlgAlert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    Toast.makeText(getApplicationContext(), "Contact was not saved.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), R.string.Contact_was_not_saved_, Toast.LENGTH_SHORT).show();
                 }
             });
             dlgAlert.create().show();
@@ -801,95 +818,133 @@ String currentAddress = "";
     }
 
     public void FirstTextMessage( User user, ArrayList<Contacts> contacts){
-
+        //Signal Button first push user info sent out
         if(contacts.size() == 1){
-            String userInfo = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            String userInfo = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+
+                    user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
             contacts.get(0).getFullName();
             contacts.get(0).getPhoneNum();
 
             SmsManager sms=SmsManager.getDefault();
             sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, "***ATTENTION***", null,null);
-            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null,
+                    userDetails.getFirstName()+" might be in some kind of danger and has press " +
+                            "an emergency alert through the app HelperTracker", null,null);
             sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userInfo, null,null);
-            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, contacts.get(0).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null,
+                    contacts.get(0).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
 
         }else if(contacts.size() == 2){
-            String userInfo = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            String userInfo = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+
+                    user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
             contacts.get(0).getFullName();
             contacts.get(0).getPhoneNum();
 
             SmsManager sms=SmsManager.getDefault();
             sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, "***ATTENTION***", null,null);
-            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null,
+                    userDetails.getFirstName()+" might be in some kind of danger and has press " +
+                            "an emergency alert through the app HelperTracker", null,null);
             sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userInfo, null,null);
-            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, contacts.get(0).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null,
+                    contacts.get(0).getFullName()+" we'll keep you up to date with " +
+                            ""+user.getFirstName()+"'s current location.", null,null);
 
-            String userInfo1 = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            String userInfo1 = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "
+                    + user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
             contacts.get(1).getFullName();
             contacts.get(1).getPhoneNum();
 
             SmsManager sms1=SmsManager.getDefault();
             sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, "***ATTENTION***", null,null);
-            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, userDetails.getFirstName()+
+                    " might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
             sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, userInfo1, null,null);
-            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, contacts.get(1).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null,
+                    contacts.get(1).getFullName()+" we'll keep you up to date with "
+                            +user.getFirstName()+"'s current location.", null,null);
 
         }else if(contacts.size() == 3){
-            String userInfo = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            String userInfo = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "
+                    + user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
             contacts.get(0).getFullName();
             contacts.get(0).getPhoneNum();
 
             SmsManager sms=SmsManager.getDefault();
             sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, "***ATTENTION***", null,null);
-            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userDetails.getFirstName()+"" +
+                    " might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
             sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, userInfo, null,null);
-            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null, contacts.get(0).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+            sms.sendTextMessage(contacts.get(0).getPhoneNum(), null,
+                    contacts.get(0).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
 
-            String userInfo1 = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            String userInfo1 = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "
+                    + user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
             contacts.get(1).getFullName();
             contacts.get(1).getPhoneNum();
 
             SmsManager sms1=SmsManager.getDefault();
             sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, "***ATTENTION***", null,null);
-            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null,
+                    userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
             sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, userInfo1, null,null);
-            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, contacts.get(1).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+            sms1.sendTextMessage(contacts.get(1).getPhoneNum(), null, contacts.get(1).getFullName()+
+                    " we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
 
-            String userInfo2 = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "+ user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
+            String userInfo2 = "Name: "+user.getFirstName()+" "+user.getLastName()+"\nEye Color: "
+                    + user.getEyes()+"\nHair Color: "+user.getHair()+"\n Height: "+user.getHeight()+ "\nWeight: "+user.getWeight();
             contacts.get(1).getFullName();
             contacts.get(1).getPhoneNum();
 
             SmsManager sms2=SmsManager.getDefault();
             sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null, "***ATTENTION***", null,null);
-            sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null, userDetails.getFirstName()+" might be in some kind of danger and has press an emergency alert through the app HelperTracker", null,null);
+            sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null,
+                    userDetails.getFirstName()+" might be in some kind of danger and has press " +
+                            "an emergency alert through the app HelperTracker", null,null);
             sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null, userInfo1, null,null);
-            sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null, contacts.get(2).getFullName()+" we'll keep you up to date with "+user.getFirstName()+"'s current location.", null,null);
+            sms2.sendTextMessage(contacts.get(2).getPhoneNum(), null,
+                    contacts.get(2).getFullName()+" we'll keep you up to date " +
+                            "with "+user.getFirstName()+"'s current location.", null,null);
         }
 
     }
 
     public void SendOutLocation(String lat, String lon, String addy){
+        //Sends current user location
         if(contactsLog.size() == 1){
             SmsManager sms=SmsManager.getDefault();
-            sms.sendTextMessage( contactsLog.get(0).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
+            sms.sendTextMessage( contactsLog.get(0).getPhoneNum(), null,
+                    "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy,
+                    null,null);
 
         }else if(contactsLog.size() == 2){
             SmsManager sms=SmsManager.getDefault();
-            sms.sendTextMessage( contactsLog.get(0).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
+            sms.sendTextMessage( contactsLog.get(0).getPhoneNum(), null,
+                    "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy,
+                    null,null);
             SmsManager sms1=SmsManager.getDefault();
-            sms1.sendTextMessage( contactsLog.get(1).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
+            sms1.sendTextMessage( contactsLog.get(1).getPhoneNum(), null,
+                    "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy,
+                    null,null);
 
         }else if(contactsLog.size() == 3){
             SmsManager sms=SmsManager.getDefault();
-            sms.sendTextMessage( contactsLog.get(0).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
+            sms.sendTextMessage( contactsLog.get(0).getPhoneNum(), null,
+                    "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy,
+                    null,null);
             SmsManager sms1=SmsManager.getDefault();
-            sms1.sendTextMessage( contactsLog.get(1).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
+            sms1.sendTextMessage( contactsLog.get(1).getPhoneNum(), null,
+                    "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy,
+                    null,null);
             SmsManager sms2=SmsManager.getDefault();
-            sms2.sendTextMessage( contactsLog.get(2).getPhoneNum(), null, "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy, null,null);
+            sms2.sendTextMessage( contactsLog.get(2).getPhoneNum(), null,
+                    "Current Known Location\nLongitude: "+ lon+"\nLatitude: "+lat+"\nAddress: "+addy,
+                    null,null);
         }
     }
 
     public void createNewUser(String email, String password){
+        //Creates new user in firebase
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>(){
                     @Override
@@ -924,7 +979,9 @@ String currentAddress = "";
     public void messageToUser(){ Toast.makeText(this, message, Toast.LENGTH_SHORT).show(); }
 
     public void updateUI(FirebaseUser user){
-        String keyId = mDatabase.push().getKey();
+        //Updates ui after login/signup by user
+        message = "";
+       // String keyId = mDatabase.push().getKey();
         char[] emailChar = userEmail.toCharArray();
         String userKey ="";
 
@@ -960,6 +1017,7 @@ String currentAddress = "";
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
+        //Grabs current location of user
         Geocoder geocoder;
         List<Address> addresses;
         String address = "";

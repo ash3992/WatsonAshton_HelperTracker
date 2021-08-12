@@ -1,4 +1,4 @@
-package com.example.watsonashton_helpertracker;
+package com.example.watsonashton_helpertracker.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,8 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.watsonashton_helpertracker.fragments.AddNewContactFragment;
-import com.example.watsonashton_helpertracker.objects.Contacts;
+import com.example.watsonashton_helpertracker.R;
 import com.example.watsonashton_helpertracker.objects.User;
 
 public class ProfileFragment extends Fragment {

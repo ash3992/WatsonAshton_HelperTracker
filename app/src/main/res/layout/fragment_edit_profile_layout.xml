@@ -7,7 +7,7 @@
 
     <TextView
         android:id="@+id/textViewFirst"
-        android:layout_width="114dp"
+        android:layout_width="186dp"
         android:layout_height="30dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="100dp"
@@ -31,7 +31,7 @@
 
     <TextView
         android:id="@+id/textViewEye"
-        android:layout_width="114dp"
+        android:layout_width="186dp"
         android:layout_height="30dp"
         android:layout_marginTop="16dp"
         android:text="@string/eye_color"
@@ -54,7 +54,7 @@
 
     <TextView
         android:id="@+id/textViewWeight"
-        android:layout_width="114dp"
+        android:layout_width="186dp"
         android:layout_height="30dp"
         android:layout_marginTop="16dp"
         android:text="@string/weight"
@@ -77,7 +77,7 @@
 
     <TextView
         android:id="@+id/textViewHair"
-        android:layout_width="114dp"
+        android:layout_width="186dp"
         android:layout_height="30dp"
         android:layout_marginTop="16dp"
         android:text="@string/hair_color"
@@ -100,8 +100,8 @@
 
     <TextView
         android:id="@+id/textViewLastPlaceHolder"
-        android:layout_width="242dp"
-        android:layout_height="27dp"
+        android:layout_width="245dp"
+        android:layout_height="35dp"
         android:layout_marginTop="16dp"
         android:text="@string/last"
         android:textColor="@color/black"
@@ -111,7 +111,7 @@
 
     <TextView
         android:id="@+id/textViewHeight"
-        android:layout_width="114dp"
+        android:layout_width="186dp"
         android:layout_height="30dp"
         android:layout_marginTop="16dp"
         android:text="@string/height"
@@ -123,7 +123,7 @@
 
     <TextView
         android:id="@+id/textViewLast"
-        android:layout_width="114dp"
+        android:layout_width="186dp"
         android:layout_height="30dp"
         android:layout_marginTop="16dp"
         android:text="@string/last_names"
@@ -135,8 +135,8 @@
 
     <TextView
         android:id="@+id/textViewFirstPlaceHolder"
-        android:layout_width="240dp"
-        android:layout_height="28dp"
+        android:layout_width="246dp"
+        android:layout_height="37dp"
         android:layout_marginTop="16dp"
         android:text="@string/first"
         android:textColor="@color/black"

@@ -16,7 +16,6 @@ import java.util.ArrayList;
 public class AlarmReceiver extends BroadcastReceiver {
     private NotificationManager mNotificationManager;
     private static final int NOTIFICATION_ID = 0;
-
     // Notification channel ID.
     private static final String PRIMARY_CHANNEL_ID = "primary_notification_channel";
     public interface OnNewLocationListener {
